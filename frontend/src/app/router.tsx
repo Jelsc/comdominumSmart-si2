@@ -17,7 +17,7 @@ export default function AppRouter() {
   <Route path="/" element={<Navigate to="/admin" replace />} />
         {/* Rutas protegidas de administración */}
         <Route
-          path="/admin/roles-permisos/permisos"
+          path="/admin/permisos"
           element={
             <ProtectedRoute requireAdmin={true}>
               <PermisosCRUD />
@@ -25,7 +25,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/admin/roles-permisos/rol"
+          path="/admin/roles"
           element={
             <ProtectedRoute requireAdmin={true}>
               <RolForm />

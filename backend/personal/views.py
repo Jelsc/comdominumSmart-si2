@@ -22,15 +22,8 @@ class PersonalViewSet(viewsets.ModelViewSet):
     serializer_class = PersonalSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['estado', 'usuario']
-    search_fields = [
-        'nombre',
-        'apellido',
-        'email',
-        'ci',
-        'codigo_empleado'
-    ]
-    filterset_fields = ["estado", "es_activo", "departamento"]
+    # Campos válidos para filtrado/búsqueda/ordenamiento. Se eliminan campos inexistentes.
+    filterset_fields = ["estado", "usuario"]
     search_fields = ["nombre", "apellido", "email", "ci", "codigo_empleado"]
     ordering_fields = ["nombre", "apellido", "fecha_creacion", "fecha_ingreso"]
     ordering = ["-fecha_creacion"]

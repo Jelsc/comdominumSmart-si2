@@ -22,15 +22,8 @@ class ConductorViewSet(viewsets.ModelViewSet):
     serializer_class = ConductorSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['estado', 'tipo_licencia']
-    search_fields = [
-        'nombre',
-        'apellido',
-        'email',
-        'ci',
-        'nro_licencia'
-    ]
-    filterset_fields = ["estado", "es_activo", "tipo_licencia"]
+    # Campos válidos para filtrado/búsqueda/ordenamiento. Se eliminan campos inexistentes.
+    filterset_fields = ["estado", "tipo_licencia", "usuario"]
     search_fields = ["nombre", "apellido", "email", "ci", "nro_licencia"]
     ordering_fields = ["nombre", "fecha_creacion", "fecha_venc_licencia"]
     ordering = ["-fecha_creacion"]
@@ -51,10 +44,13 @@ class ConductorViewSet(viewsets.ModelViewSet):
 
         # Si el usuario no tiene permisos para gestionar conductores, solo puede ver su propio perfil
         if not self.request.user.tiene_permiso("gestionar_conductores"):
-            if hasattr(self.request.user, "conductor_profile"):
-                return queryset.filter(id=self.request.user.conductor_profile.id)
-            else:
+            # Para la relación OneToOne en reversa, acceder al atributo puede lanzar DoesNotExist
+            try:
+                conductor_profile = self.request.user.conductor_profile
+            except Conductor.DoesNotExist:
                 return queryset.none()
+            else:
+                return queryset.filter(id=conductor_profile.id)
 
         # Filtro adicional: licencia_vencida=true/false
         licencia_vencida = self.request.query_params.get("licencia_vencida")
