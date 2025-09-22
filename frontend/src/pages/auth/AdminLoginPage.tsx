@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogIn, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface AdminLoginFormData {
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  const goBack = () => navigate(-1);
+  // Eliminado botón de volver
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
@@ -71,18 +71,8 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Acceso administrador
-          </h2>
-          <Button
-            variant="outline"
-            type="button"
-            onClick={goBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" /> Volver
-          </Button>
+        <div className="flex items-center justify-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Acceso administrador</h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Message */}

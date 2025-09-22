@@ -52,7 +52,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           {!collapsed && (
             <Link to="/admin/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <TransporteIcon className="w-8 h-8" />
-              <span className="text-lg font-bold text-blue-700">MoviFleet</span>
+              <span className="text-lg font-bold text-blue-700">Smart Condominium</span>
             </Link>
           )}
           {collapsed && (

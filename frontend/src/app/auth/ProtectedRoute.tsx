@@ -23,9 +23,9 @@ export default function ProtectedRoute({
     return <div className="flex items-center justify-center min-h-screen">Verificando autenticación...</div>;
   }
 
-  // Si no está autenticado, redirige al login
+  // Si no está autenticado, redirige al login de admin (ya no hay login cliente en web)
   if (!isAuthenticated) {
-    return <Navigate to={requireAdmin ? "/admin" : "/login"} state={{ from: location }} replace />;
+    return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 
   // Si requiere admin pero el usuario no lo es, redirige al login admin

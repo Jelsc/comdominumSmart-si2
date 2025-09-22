@@ -1,4 +1,4 @@
-# transporte-si2
+# ComdominumSmart-si2
 
 Monorepo para **PostgreSQL + Django REST (backend)**, **React + Vite (frontend)** y **Flutter (mobile)**.
 En DEV usamos Docker para **db + backend + frontend**. Flutter se corre fuera de Docker (emulador/dispositivo).

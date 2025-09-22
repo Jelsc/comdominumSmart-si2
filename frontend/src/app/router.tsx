@@ -1,26 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "../pages/inicio/home.page";
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
-import EmailVerificationPage from "../pages/auth/EmailVerificationPage";
-import CodeVerificationPage from "../pages/auth/CodeVerificationPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import AdminPage from "../pages/admin/admin.page";
 import AdminLoginPage from "@/pages/auth/AdminLoginPage";
 import ProtectedRoute from "@/app/auth/ProtectedRoute";
 import PermisosCRUD from "../pages/admin/usuarios/roles-permisos/permiso";
 import RolForm from "../pages/admin/usuarios/roles-permisos/rol";
 import BitacoraPage from "@/pages/admin/bitacora.page";
-// Nuevas páginas refactorizadas
 import PersonalPage from "../pages/admin/personal/personal.page";
 import ConductoresPage from "../pages/admin/conductores/driver.page";
 import UsuariosPage from "../pages/admin/usuarios/users.page";
-import AccountSettingsPage from "../pages/profile/account-settings.page";
+import AccountSettingsPage from "./auth/account-settings.page";
 
 export default function AppRouter() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+  <Route path="/" element={<Navigate to="/admin" replace />} />
         {/* Rutas protegidas de administración */}
         <Route
           path="/admin/roles-permisos/permisos"
@@ -47,10 +41,11 @@ export default function AppRouter() {
           }
         />
         {/* auth */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/email-verification" element={<EmailVerificationPage />} />
-        <Route path="/code-verification" element={<CodeVerificationPage />} />
+  {/* Ya no hay login/registro de cliente en web: redirigir a /admin */}
+  <Route path="/login" element={<Navigate to="/admin" replace />} />
+  <Route path="/register" element={<Navigate to="/admin" replace />} />
+  <Route path="/email-verification" element={<Navigate to="/admin" replace />} />
+  <Route path="/code-verification" element={<Navigate to="/admin" replace />} />
 
         {/* admin */}
         <Route path="/admin" element={<AdminLoginPage />} />
@@ -121,34 +116,18 @@ export default function AppRouter() {
           }
         />
 
-        {/* rutas protegidas de usuario */}
-        <Route
-          path="/perfil"
-          element={
-            <ProtectedRoute>
-              <div>Perfil de usuario (protegido)</div>
-            </ProtectedRoute>
-          }
-        />
+        {/* rutas de usuario ya no aplican en web; mantener settings solo para admin */}
         <Route
           path="/profile/edit"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <AccountSettingsPage />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/viajes"
-          element={
-            <ProtectedRoute>
-              <div>Mis viajes (protegido)</div>
-            </ProtectedRoute>
-          }
-        />
 
-        {/* catch-all */}
-        <Route path="*" element={<HomePage />} />
+  {/* catch-all: redirigir al login de admin */}
+  <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </Router>
   );

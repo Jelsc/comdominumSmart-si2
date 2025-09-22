@@ -29,8 +29,8 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
       } else {
         await logout();
       }
-      // Redirigir al login después del logout exitoso
-      navigate("/login");
+  // Redirigir al login de admin después del logout exitoso
+  navigate("/admin");
     } catch (error) {
       console.error("Error durante el logout:", error);
 
@@ -45,8 +45,8 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
         console.error("Error limpiando tokens locales:", localError);
       }
 
-      // Redirigir al login de todas formas
-      navigate("/login");
+  // Redirigir al login admin de todas formas
+  navigate("/admin");
     }
   };
 

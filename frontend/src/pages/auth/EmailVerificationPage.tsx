@@ -32,9 +32,9 @@ export default function EmailVerificationPage() {
     if (verified === "true") {
       setStatus("success");
       setMessage("¡Email verificado exitosamente! Ya puedes iniciar sesión.");
-      // Redirigir al login después de 3 segundos
+      // Redirigir al login admin después de 3 segundos
       setTimeout(() => {
-        navigate("/login");
+        navigate("/admin");
       }, 3000);
     } else if (key) {
       setVerificationKey(key);
@@ -59,9 +59,9 @@ export default function EmailVerificationPage() {
         setStatus("success");
         setMessage("¡Email verificado exitosamente! Ya puedes iniciar sesión.");
 
-        // Redirigir al login después de 3 segundos
+        // Redirigir al login admin después de 3 segundos
         setTimeout(() => {
-          navigate("/login");
+          navigate("/admin");
         }, 3000);
       } else {
         throw new Error(response.error || "Error al verificar el email");
@@ -105,7 +105,7 @@ export default function EmailVerificationPage() {
   };
 
   const goToLogin = () => {
-    navigate("/login");
+    navigate("/admin");
   };
 
   const goBack = () => {

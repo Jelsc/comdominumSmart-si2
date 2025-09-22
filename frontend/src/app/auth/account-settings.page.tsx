@@ -164,11 +164,11 @@ export default function AccountSettings({}: AccountSettingsProps) {
       } else {
         logout();
       }
-      navigate('/login');
+      navigate('/admin');
     } catch (error) {
       console.error('Error durante el logout:', error);
-      // Forzar redirección al login aunque falle el logout
-      navigate('/login');
+  // Forzar redirección al login admin aunque falle el logout
+  navigate('/admin');
     } finally {
       setLoading(false);
     }

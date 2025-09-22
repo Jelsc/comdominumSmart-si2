@@ -32,7 +32,7 @@ const CodeVerificationPage: React.FC = () => {
   // Redirigir si no hay datos de email
   useEffect(() => {
     if (!email || !username) {
-      navigate("/register");
+      navigate("/admin");
     }
   }, [email, username, navigate]);
 
@@ -125,7 +125,7 @@ const CodeVerificationPage: React.FC = () => {
       if (response.ok) {
         setSuccess("¡Email verificado exitosamente!");
         setTimeout(() => {
-          navigate("/login", {
+          navigate("/admin", {
             state: {
               message:
                 "Cuenta verificada exitosamente. Ya puedes iniciar sesión.",
