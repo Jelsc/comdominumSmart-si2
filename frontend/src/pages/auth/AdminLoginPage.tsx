@@ -69,88 +69,97 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="flex items-center justify-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Acceso administrador</h2>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
-
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Usuario o Correo Electrónico
-            </label>
-            <Input
-              id="username"
-              name="username"
-              type="text"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="admin"
-              disabled={isSubmitting}
-              required
-              className="px-4 py-3"
-            />
+    <div className="min-h-screen relative">
+      {/* Fondo */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-admin.jpg')" }}
+      />
+      {/* Capa oscura para contraste */}
+      <div className="absolute inset-0 bg-black/40" />
+      {/* Contenido */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-8">
+          <div className="flex items-center justify-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Acceso administrador</h2>
           </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Contraseña
-            </label>
-            <div className="relative">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Usuario o Correo Electrónico
+              </label>
               <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
+                id="username"
+                name="username"
+                type="text"
+                value={formData.username}
                 onChange={handleInputChange}
+                placeholder="admin"
                 disabled={isSubmitting}
                 required
-                className="px-4 py-3 pr-10"
+                className="px-4 py-3"
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute top-1/2 right-2 -translate-y-1/2 flex items-center justify-center p-0"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </Button>
             </div>
-          </div>
-          <Button
-            type="submit"
-            className="w-full py-3 px-4 font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Ingresando...
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Contraseña
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  required
+                  className="px-4 py-3 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-1/2 right-2 -translate-y-1/2 flex items-center justify-center p-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </Button>
               </div>
-            ) : (
-              <>
-                <LogIn className="mr-2" /> Ingresar
-              </>
-            )}
-          </Button>
-        </form>
+            </div>
+            <Button
+              type="submit"
+              className="w-full py-3 px-4 font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Ingresando...
+                </div>
+              ) : (
+                <>
+                  <LogIn className="mr-2" /> Ingresar
+                </>
+              )}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

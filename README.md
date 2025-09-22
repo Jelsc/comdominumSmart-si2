@@ -44,7 +44,7 @@ copy frontend\.env.example frontend\.env
 ### 2) Levantar servicios
 
 ```bash
-docker compose up -d --build
+docker-compose up -d --build
 ```
 
 Nota: El superusuario y otros datos iniciales se crean automáticamente durante el arranque del contenedor usando el sistema de seeders. Las credenciales están definidas en el archivo `.env` (variables `DJANGO_SUPERUSER_*`).
@@ -53,23 +53,23 @@ Nota: El superusuario y otros datos iniciales se crean automáticamente durante 
 
 ```bash
 # para iniciar los contenedores
-docker compose up -d
+docker-compose up -d
 
 # MIGRACIONES (importante seguir este orden):
 # 1. Primero generar archivos de migración (detecta cambios en modelos)
 #    Para todas las apps:
-docker compose exec backend python manage.py makemigrations
+docker-compose exec backend python manage.py makemigrations
 
 #    O para apps específicas:
 docker compose exec backend python manage.py makemigrations users
 docker compose exec backend python manage.py makemigrations account
 
 # 2. Luego aplicar migraciones a la base de datos
-docker compose exec backend python manage.py migrate
+docker-compose exec backend python manage.py migrate
 
 # SEEDERS:
 # Para ejecutar todos los seeders automáticamente:
-docker compose exec backend python manage.py seed
+docker-compose exec backend python manage.py seed
 
 # Para ejecutar seeders específicos (por nombre, sin el sufijo "_seeder"):
 docker compose exec backend python manage.py seed user rol
@@ -163,7 +163,3 @@ docker compose exec backend bash
 
 ---
 
-## 📦 Roadmap (VRP / ETA)
-
-- **VRP**: integrar `ortools` para ruteo (tareas offline con Celery + Redis).
-- **ETA**: baseline con `scikit-learn` / `xgboost` usando features de tráfico/histórico.
