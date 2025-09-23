@@ -97,10 +97,17 @@ docker compose logs -f frontend
 
 ### 4) URLs
 
+**Desarrollo local:**
 - Backend (Django): [http://localhost:8000](http://localhost:8000)
 - Admin Django: [http://localhost:8000/admin](http://localhost:8000/admin)
 - Frontend (Vite): [http://localhost:5173](http://localhost:5173)
 - MailHog: [http://localhost:8025](http://localhost:8025/)
+
+**Producción EC2:**
+- Backend (Django): [http://3.230.69.204:8000](http://3.230.69.204:8000)
+- Admin Django: [http://3.230.69.204:8000/admin](http://3.230.69.204:8000/admin)
+- Frontend (Vite): [http://3.230.69.204:5173](http://3.230.69.204:5173)
+- MailHog: [http://3.230.69.204:8025](http://3.230.69.204:8025/)
 
 ## 🧑‍💻 Desarrollo local (sin Docker) — opcional
 
@@ -153,13 +160,130 @@ docker compose exec backend bash
 
 ---
 
+## 🚀 Despliegue en EC2 (IP: 3.230.69.204)
+
+### **Paso a paso en tu servidor EC2:**
+
+```bash
+# 1. Conectar a EC2
+ssh -i tu-clave.pem ubuntu@3.230.69.204
+
+# 2. Clonar repositorio
+git clone https://github.com/Jelsc/comdominumSmart-si2.git
+cd comdominumSmart-si2
+
+# 3. Usar configuración pre-configurada para EC2
+cp .env.ec2 .env
+cp frontend/.env.ec2 frontend/.env
+
+# 4. IMPORTANTE: Cambiar credenciales de seguridad
+nano .env
+# - Cambiar DJANGO_SECRET_KEY por algo aleatorio y seguro
+# - Cambiar DJANGO_SUPERUSER_PASSWORD por una contraseña segura
+# - Cambiar POSTGRES_PASSWORD por una contraseña segura
+
+# 5. Levantar servicios
+docker compose up -d --build
+
+# 6. Aplicar migraciones
+docker compose exec backend python manage.py migrate
+
+# 7. Crear datos iniciales
+docker compose exec backend python manage.py seed user rol --force
+```
+
+### **URLs de acceso:**
+- **Frontend**: http://3.230.69.204:5173
+- **Backend/API**: http://3.230.69.204:8000
+- **Admin Django**: http://3.230.69.204:8000/admin
+- **MailHog**: http://3.230.69.204:8025
+
+### **Security Group necesario:**
+```
+Inbound Rules:
+- SSH (22): Tu IP
+- HTTP Frontend (5173): 0.0.0.0/0
+- HTTP Backend (8000): 0.0.0.0/0
+- MailHog (8025): 0.0.0.0/0
+```
+
+---
+
+## 🌐 Configuración de URLs Dinámicas
+
+El frontend está configurado para **nunca usar URLs hardcodeadas** hacia el backend:
+
+### Prioridad de resolución de API URL:
+1. **Variable de entorno**: Si existe `VITE_API_URL` en `frontend/.env`, la usa
+2. **Construcción dinámica**: Si no existe, construye automáticamente usando:
+   - `window.location.protocol` + `window.location.hostname` + `:8000`
+
+### Ejemplos:
+- **Local development**: `http://127.0.0.1:8000` o `http://localhost:8000`
+- **EC2/Servidor**: `http://tu-ip-publica:8000` (se resuelve automáticamente)
+- **Docker**: `http://host-docker:8000` (según el hostname)
+
+### Variables de entorno importantes:
+
+**Frontend (.env)**:
+```bash
+VITE_API_URL=http://127.0.0.1:8000  # Opcional - se resuelve automáticamente si no existe
+```
+
+**Backend (.env)**:
+```bash
+DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,tu-ip-publica
+CORS_ALLOW_ALL_ORIGINS=True  # Solo desarrollo
+```
+
+---
+
+## 🚀 Despliegue en Producción
+
+### Docker en EC2/VPS:
+```bash
+# 1. Clonar repo
+git clone <repo> && cd comdominumSmart-si2
+
+# 2. Configurar variables (NO uses las de ejemplo en producción)
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
+
+# 3. Editar .env con valores de producción:
+#    - DJANGO_SECRET_KEY (genera uno nuevo)
+#    - DJANGO_DEBUG=0
+#    - DJANGO_ALLOWED_HOSTS=tu-ip-publica,tu-dominio.com
+#    - CORS_ALLOW_ALL_ORIGINS=False (más seguro)
+#    - Passwords de BD seguros
+
+# 4. Levantar
+docker compose up -d --build
+
+# 5. Acceder desde navegador:
+#    Frontend: http://tu-ip-publica:5173
+#    Backend: http://tu-ip-publica:8000
+```
+
+### Consideraciones de seguridad:
+- **NO uses** `CORS_ALLOW_ALL_ORIGINS=True` en producción
+- Cambia `DJANGO_SECRET_KEY` por uno aleatorio
+- Usa contraseñas fuertes para la base de datos
+- Considera usar un reverse proxy (nginx) para HTTPS
+
+---
+
 ## 🩹 Troubleshooting
 
+### URLs y CORS:
+- **Frontend no conecta al backend**: El sistema resuelve automáticamente la URL usando `window.location`. Si usas un AdBlocker como uBlock/Brave, puede bloquear peticiones a puertos no estándar.
+- **ERR_BLOCKED_BY_CLIENT**: Desactiva temporalmente el AdBlocker o añade la IP/puerto a la lista blanca.
+- **CORS errors**: Verifica que `CORS_ALLOW_ALL_ORIGINS=True` en desarrollo o que tu dominio/IP esté en `CORS_ALLOWED_ORIGINS`.
+
+### Otros problemas comunes:
 - **Puertos ocupados**: cambia el lado izquierdo del mapeo en `docker-compose.yml`
   (ej: `"8001:8000"`, `"5174:5173"`, `"15432:5432"`).
 - **Backend no conecta a DB en Docker**: confirma que en `compose` se fuerza `POSTGRES_HOST: db`.
-- **CORS** en dev: ya está abierto (`CORS_ALLOW_ALL_ORIGINS=True`). En prod **cerrarlo** y usar `CORS_ALLOWED_ORIGINS`.
-- **Vite no ve la API**: revisa `frontend/.env` → `VITE_API_URL=http://localhost:8000`.
 
 ---
 

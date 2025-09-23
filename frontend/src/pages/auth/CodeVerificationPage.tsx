@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Shield, AlertCircle, CheckCircle } from "lucide-react";
+import { api } from "@/lib/api";
 
 interface LocationState {
   email: string;
@@ -55,41 +56,26 @@ const CodeVerificationPage: React.FC = () => {
 
   const sendVerificationCode = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/admin/mobile/send-code/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      await api.post("/api/admin/mobile/send-code/", { email });
+      
+      setSuccess("Código de verificación enviado exitosamente");
+      setError(null);
+      setResendCountdown(60); // 60 segundos de espera
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Error al enviar código";
+      setError(errorMessage);
+      setSuccess(null);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Código de verificación enviado exitosamente");
-        setError(null);
-        setResendCountdown(60); // 60 segundos de espera
-      } else {
-        setError(data.error || "Error al enviar código");
-        setSuccess(null);
-
-        // Si es error de rate limiting, ajustar el countdown
-        if (response.status === 429 && data.error) {
-          // Extraer tiempo de espera del mensaje si está disponible
-          const waitMatch = data.error.match(/(\d+) segundos/);
-          if (waitMatch) {
-            setResendCountdown(parseInt(waitMatch[1]));
-          } else {
-            setResendCountdown(60);
-          }
+      // Si es error de rate limiting, ajustar el countdown
+      if (error.response?.status === 429 && error.response?.data?.error) {
+        // Extraer tiempo de espera del mensaje si está disponible
+        const waitMatch = error.response.data.error.match(/(\d+) segundos/);
+        if (waitMatch) {
+          setResendCountdown(parseInt(waitMatch[1]));
+        } else {
+          setResendCountdown(60);
         }
       }
-    } catch (err) {
-      setError("Error de conexión");
-      setSuccess(null);
     }
   };
 
@@ -109,34 +95,20 @@ const CodeVerificationPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/admin/mobile/verify-code/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      await api.post("/api/admin/mobile/verify-code/", { email, code });
+      
+      setSuccess("¡Email verificado exitosamente!");
+      setTimeout(() => {
+        navigate("/admin", {
+          state: {
+            message:
+              "Cuenta verificada exitosamente. Ya puedes iniciar sesión.",
           },
-          body: JSON.stringify({ email, code }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("¡Email verificado exitosamente!");
-        setTimeout(() => {
-          navigate("/admin", {
-            state: {
-              message:
-                "Cuenta verificada exitosamente. Ya puedes iniciar sesión.",
-            },
-          });
-        }, 2000);
-      } else {
-        setError(data.error || "Código incorrecto");
-      }
-    } catch (err) {
-      setError("Error de conexión");
+        });
+      }, 2000);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.detail || "Código incorrecto";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -150,37 +122,23 @@ const CodeVerificationPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/admin/mobile/resend-code/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      await api.post("/api/admin/mobile/resend-code/", { email });
+      
+      setSuccess("Código reenviado exitosamente");
+      setResendCountdown(60);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Error al reenviar código";
+      setError(errorMessage);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Código reenviado exitosamente");
-        setResendCountdown(60);
-      } else {
-        setError(data.error || "Error al reenviar código");
-
-        // Si es error de rate limiting, ajustar el countdown
-        if (response.status === 429 && data.error) {
-          const waitMatch = data.error.match(/(\d+) segundos/);
-          if (waitMatch) {
-            setResendCountdown(parseInt(waitMatch[1]));
-          } else {
-            setResendCountdown(60);
-          }
+      // Si es error de rate limiting, ajustar el countdown
+      if (error.response?.status === 429 && error.response?.data?.error) {
+        const waitMatch = error.response.data.error.match(/(\d+) segundos/);
+        if (waitMatch) {
+          setResendCountdown(parseInt(waitMatch[1]));
+        } else {
+          setResendCountdown(60);
         }
       }
-    } catch (err) {
-      setError("Error de conexión");
     } finally {
       setIsResending(false);
     }

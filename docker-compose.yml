@@ -33,8 +33,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-condominio}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      FRONTEND_URL: "http://localhost:5173"
-      FRONTEND_URL_ALT: "http://127.0.0.1:5173"
+      FRONTEND_URL: ${FRONTEND_URL:-http://127.0.0.1:5173}
+      FRONTEND_URL_ALT: ${FRONTEND_URL_ALT:-http://localhost:5173}
       GOOGLE_OAUTH2_CLIENT_ID: ${GOOGLE_OAUTH2_CLIENT_ID:-}
       GOOGLE_OAUTH2_CLIENT_SECRET: ${GOOGLE_OAUTH2_CLIENT_SECRET:-}
       REDIS_URL: "redis://redis:6379/0"
@@ -45,7 +45,7 @@ services:
       DEFAULT_FROM_EMAIL: "noreply@condominio.local"
       SITE_ID: "1"
       ACCOUNT_EMAIL_VERIFICATION: "mandatory"
-      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-True}
     depends_on:
       db:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
     container_name: condominio_frontend
     working_dir: /app
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+      VITE_API_URL: ${VITE_API_URL:-}
       VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
       # Vite necesita HOST para exponer en 0.0.0.0
     volumes:

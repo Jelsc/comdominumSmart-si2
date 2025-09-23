@@ -36,15 +36,19 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 FRONTEND_URL_ALT = os.getenv("FRONTEND_URL_ALT", "http://127.0.0.1:5173")
 
-# CORS_ALLOW_ALL_ORIGINS = True  # SOLO DEV. En prod: usa CORS_ALLOWED_ORIGINS.
 # Configuración de CORS
-CORS_ALLOWED_ORIGINS = [
-    FRONTEND_URL,
-    FRONTEND_URL_ALT,
-    # IP del emulador Android para desarrollo móvil
-    "http://10.0.2.2:8000",
-    "http://10.0.2.2:5173",
-]
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True") == "True"  # Para desarrollo
+
+# Si no permite todos los orígenes, usar lista específica
+if not CORS_ALLOW_ALL_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        FRONTEND_URL,
+        FRONTEND_URL_ALT,
+        # IP del emulador Android para desarrollo móvil
+        "http://10.0.2.2:8000",
+        "http://10.0.2.2:5173",
+    ]
+
 CORS_ALLOW_CREDENTIALS = True  # Por si usas sesión/cookies
 # Application definition
 

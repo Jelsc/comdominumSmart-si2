@@ -1,5 +1,5 @@
-// Configuración base de la API
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Importar el cliente centralizado
+import { api, getApiBaseUrl } from "@/lib/api";
 
 // Tipos de datos para la API
 export interface ApiResponse<T = any> {
@@ -76,76 +76,59 @@ export class ApiError extends Error {
   }
 }
 
-// Función para hacer peticiones HTTP
+// Función para hacer peticiones HTTP usando el cliente Axios centralizado
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: {
+    method?: string;
+    body?: any;
+    headers?: Record<string, string>;
+  } = {}
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  const defaultHeaders: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
   // Agregar token de autenticación si existe
   const token = localStorage.getItem("access_token");
+  const headers = {
+    ...options.headers,
+  };
   if (token) {
-    defaultHeaders.Authorization = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
+  const config = {
+    method: options.method || 'GET',
+    headers,
+    data: options.body,
   };
 
   try {
-    const response = await fetch(url, config);
-
-    if (!response.ok) {
-      // Intentar obtener el contenido de error si existe
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: "Error en la petición" };
-      }
-      
-      throw new ApiError(
-        errorData.error || errorData.message || "Error en la petición",
-        response.status,
-        errorData
-      );
-    }
-
-    // Para respuestas 204 (No Content) o respuestas vacías, no intentar parsear JSON
-    if (response.status === 204 || response.headers.get('content-length') === '0') {
-      return {
-        success: true,
-        data: null,
-      };
-    }
-
-    // Intentar parsear JSON solo si hay contenido
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      data = null;
-    }
+    const response = await api({
+      url: endpoint,
+      method: config.method,
+      headers: config.headers,
+      data: config.data,
+    });
 
     return {
       success: true,
-      data,
+      data: response.data,
     };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
+  } catch (error: any) {
+    // Axios maneja los errores de manera diferente
+    if (error.response) {
+      // Error de respuesta del servidor
+      const errorData = error.response.data;
+      throw new ApiError(
+        errorData.error || errorData.message || errorData.detail || "Error en la petición",
+        error.response.status,
+        errorData
+      );
+    } else if (error.request) {
+      // Error de red
+      throw new ApiError("Error de conexión", 0, { originalError: error });
+    } else {
+      // Error en la configuración de la petición
+      throw new ApiError("Error en la petición", 0, { originalError: error });
     }
-
-    throw new ApiError("Error de conexión", 0, { originalError: error });
   }
 }
 
