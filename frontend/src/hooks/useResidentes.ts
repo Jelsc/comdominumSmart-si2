@@ -158,14 +158,20 @@ export function useResidentes(): UseResidentesState & UseResidentesActions {
           isStoreModalOpen: false,
           selectedItem: null 
         }));
-        toast.success('Residente actualizado exitosamente');
         await loadData(state.filters); // Recargar datos
         return true;
       } else {
         throw new Error(response.error || 'Error al actualizar el residente');
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    } catch (error: any) {
+      // Extraer detalles más específicos del error si están disponibles
+      const errorData = error.data || {};
+      const fieldErrors = Object.entries(errorData)
+        .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('; ');
+      
+      const errorMessage = fieldErrors || (error instanceof Error ? error.message : 'Error desconocido');
+      
       setState(prev => ({ 
         ...prev, 
         loading: false, 

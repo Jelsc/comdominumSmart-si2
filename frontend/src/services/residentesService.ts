@@ -9,17 +9,36 @@ import type {
 } from '@/types';
 
 // Mappers para convertir entre formatos del frontend y backend
-const toDTO = (data: ResidenteFormData) => ({
-  nombre: data.nombre,
-  apellido: data.apellido,
-  ci: data.ci,
-  email: data.email,
-  telefono: data.telefono,
-  unidad_habitacional: data.unidad_habitacional,
-  tipo: data.tipo,
-  fecha_ingreso: data.fecha_ingreso ? data.fecha_ingreso.toISOString().split('T')[0] : undefined,
-  estado: data.estado || 'en_proceso',
-});
+const toDTO = (data: ResidenteFormData) => {
+  // Validar formato de fecha
+  let fechaFormateada;
+  if (data.fecha_ingreso) {
+    // Manejar tanto objetos Date como strings
+    fechaFormateada = data.fecha_ingreso instanceof Date
+      ? data.fecha_ingreso.toISOString().split('T')[0] 
+      : data.fecha_ingreso;
+  }
+  
+  // Crear DTO base sin el campo usuario
+  const dto: Record<string, any> = {
+    nombre: data.nombre,
+    apellido: data.apellido,
+    ci: data.ci,
+    email: data.email,
+    telefono: data.telefono,
+    unidad_habitacional: data.unidad_habitacional,
+    tipo: data.tipo,
+    fecha_ingreso: fechaFormateada,
+    estado: data.estado || 'en_proceso',
+  };
+  
+  // Agregar usuario sólo si tiene un valor válido
+  if (data.usuario !== null && data.usuario !== undefined) {
+    dto.usuario = data.usuario;
+  }
+  
+  return dto;
+};
 
 const fromDTO = (data: any): Residente => ({
   id: data.id,
@@ -88,9 +107,11 @@ export const residentesApi = {
 
   // Crear nuevo residente
   async create(data: ResidenteFormData): Promise<ApiResponse<Residente>> {
+    const dto = toDTO(data);
+    
     const response = await apiRequest('/api/residentes/', {
       method: 'POST',
-      body: JSON.stringify(toDTO(data)),
+      body: JSON.stringify(dto),
     });
     
     if (response.success && response.data) {
@@ -105,12 +126,13 @@ export const residentesApi = {
 
   // Actualizar residente
   async update(id: number, data: ResidenteFormData): Promise<ApiResponse<Residente>> {
-    // Usar PATCH para actualizaciones parciales (más tolerante)
-    const response = await apiRequest(`/api/residentes/${id}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(toDTO(data)),
-    });
+    const dto = toDTO(data);
     
+    // Usar PUT en lugar de PATCH para asegurarnos que todos los campos se envíen
+    const response = await apiRequest(`/api/residentes/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
     if (response.success && response.data) {
       return {
         success: true,

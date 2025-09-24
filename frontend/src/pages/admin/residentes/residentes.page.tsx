@@ -78,10 +78,16 @@ export default function ResidentesPage() {
   };
 
   const handleStoreSubmit = async (data: any) => {
-    if (selectedItem) {
-      return await updateItem(selectedItem.id, data);
-    } else {
-      return await createItem(data);
+    try {
+      if (selectedItem) {
+        const result = await updateItem(selectedItem.id, data);
+        return result;
+      } else {
+        const result = await createItem(data);
+        return result;
+      }
+    } catch (error) {
+      return false;
     }
   };
 

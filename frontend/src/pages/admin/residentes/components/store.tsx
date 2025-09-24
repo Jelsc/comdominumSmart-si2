@@ -117,18 +117,36 @@ export function ResidenteStore({
   }, [isOpen, initialData, form]);
 
   const handleSubmit = async (data: ResidenteFormData) => {
-    // Requerir fecha_ingreso solo en creación; en edición (PATCH) puede omitirse
-    if (!isEdit && !data.fecha_ingreso) {
-      form.setError('fecha_ingreso', { type: 'required', message: 'La fecha de ingreso es requerida' });
+    // Validación manual para asegurar que tenemos todos los campos necesarios
+    if (!data.nombre || !data.apellido || !data.telefono || !data.email || !data.ci || !data.unidad_habitacional) {
+      toast.error('Por favor completa todos los campos obligatorios');
       return;
     }
-    const success = await onSubmit(data);
-    if (success) {
-      form.reset();
-      onClose();
-    } else {
-      // Feedback si no se pudo guardar
-      toast.error('No se pudo guardar los cambios. Revisa los campos y vuelve a intentar.');
+    
+    // Requerir fecha_ingreso solo en creación; en edición puede omitirse
+    if (!isEdit && !data.fecha_ingreso) {
+      form.setError('fecha_ingreso', { type: 'required', message: 'La fecha de ingreso es requerida' });
+      toast.error('La fecha de ingreso es requerida para nuevos residentes');
+      return;
+    }
+    
+    try {
+      // Agregar indicador visual - usaremos el estado loading
+      toast.loading(isEdit ? 'Actualizando...' : 'Creando...', { id: 'submitToast' });
+      
+      // Llamar a la función onSubmit proporcionada por el componente padre
+      const success = await onSubmit(data);
+      
+      if (success) {
+        toast.success(isEdit ? 'Residente actualizado exitosamente' : 'Residente creado exitosamente', { id: 'submitToast' });
+        form.reset();
+        onClose();
+      } else {
+        // Feedback si no se pudo guardar
+        toast.error('No se pudo guardar los cambios. Revisa los campos y vuelve a intentar.', { id: 'submitToast' });
+      }
+    } catch (error) {
+      toast.error('Error al procesar la solicitud', { id: 'submitToast' });
     }
   };
 
@@ -147,11 +165,11 @@ export function ResidenteStore({
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(async (values) => {
-              console.log('[ResidenteStore] Submit iniciado', { isEdit, values });
-              await handleSubmit(values);
-              console.log('[ResidenteStore] Submit finalizado');
-            })}
+            onSubmit={(e) => {
+              // Prevenir el envío automático del formulario
+              e.preventDefault();
+              console.log('[ResidenteStore] onSubmit del formulario capturado');
+            }}
             className="space-y-6"
           >
             {/* Información Personal */}
@@ -324,6 +342,13 @@ export function ResidenteStore({
               )}
             />
 
+            {/* Mostrar estado del formulario para depurar */}
+            <div className="text-xs text-muted-foreground mb-2">
+              Estado: {form.formState.isSubmitting ? 'Enviando...' : 'Listo para enviar'}
+              {form.formState.isSubmitSuccessful && ' (Envío exitoso)'}
+              {Object.keys(form.formState.errors).length > 0 && ' (Con errores)'}
+            </div>
+            
             <DialogFooter>
               <Button
                 type="button"
@@ -333,7 +358,44 @@ export function ResidenteStore({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading || form.formState.isSubmitting}>
+              <Button 
+                type="button" 
+                disabled={loading}
+                onClick={async () => {
+                  // Si estamos en modo edición, asegurarnos de tener una fecha válida
+                  if (isEdit && !form.getValues().fecha_ingreso) {
+                    form.setValue('fecha_ingreso', initialData?.fecha_ingreso ? new Date(initialData.fecha_ingreso) : new Date());
+                  }
+                  
+                  // Validar el formulario antes de enviar
+                  const isValid = await form.trigger();
+                  
+                  // Obtener valores del formulario
+                  const values = form.getValues();
+                  
+                  // Si hay error de validación con usuario, pero el resto está bien, intentamos proceder
+                  const userError = form.formState.errors.usuario;
+                  const otherErrors = Object.keys(form.formState.errors).filter(k => k !== 'usuario').length > 0;
+                  
+                  if (isValid || (userError && !otherErrors)) {
+                    // Procesar manualmente con datos limpios
+                    await handleSubmit({
+                      nombre: values.nombre,
+                      apellido: values.apellido,
+                      telefono: values.telefono,
+                      email: values.email,
+                      ci: values.ci,
+                      unidad_habitacional: values.unidad_habitacional,
+                      tipo: values.tipo as 'propietario' | 'inquilino',
+                      fecha_ingreso: values.fecha_ingreso,
+                      estado: values.estado as 'activo' | 'inactivo' | 'suspendido' | 'en_proceso',
+                      usuario: values.usuario
+                    });
+                  } else {
+                    toast.error('Por favor corrige los errores en el formulario');
+                  }
+                }}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEdit ? 'Actualizar' : 'Crear'}
               </Button>
