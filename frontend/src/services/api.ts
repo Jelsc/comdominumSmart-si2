@@ -95,7 +95,7 @@ export async function apiRequest<T>(
   }
 
   const config = {
-    method: options.method || 'GET',
+    method: options.method || "GET",
     headers,
     data: options.body,
   };
@@ -118,7 +118,10 @@ export async function apiRequest<T>(
       // Error de respuesta del servidor
       const errorData = error.response.data;
       throw new ApiError(
-        errorData.error || errorData.message || errorData.detail || "Error en la petición",
+        errorData.error ||
+          errorData.message ||
+          errorData.detail ||
+          "Error en la petición",
         error.response.status,
         errorData
       );
@@ -290,12 +293,14 @@ export const adminAuthService = {
   },
 
   // Obtener lista de usuarios (solo admin)
-  async getUsers(): Promise<ApiResponse<{
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: User[];
-  }>> {
+  async getUsers(): Promise<
+    ApiResponse<{
+      count: number;
+      next: string | null;
+      previous: string | null;
+      results: User[];
+    }>
+  > {
     return apiRequest("/api/admin/users/");
   },
 
@@ -462,11 +467,28 @@ export const mlService = {
 // Servicios para gestión de roles
 export const rolesService = {
   // Obtener todos los roles
-  async getRoles(): Promise<ApiResponse<{
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Array<{
+  async getRoles(): Promise<
+    ApiResponse<{
+      count: number;
+      next: string | null;
+      previous: string | null;
+      results: Array<{
+        id: number;
+        nombre: string;
+        descripcion: string;
+        es_administrativo: boolean;
+        permisos: string[];
+        fecha_creacion: string;
+        fecha_actualizacion: string;
+      }>;
+    }>
+  > {
+    return apiRequest("/api/admin/roles/");
+  },
+
+  // Obtener un rol específico
+  async getRole(id: number): Promise<
+    ApiResponse<{
       id: number;
       nombre: string;
       descripcion: string;
@@ -474,21 +496,8 @@ export const rolesService = {
       permisos: string[];
       fecha_creacion: string;
       fecha_actualizacion: string;
-    }>;
-  }>> {
-    return apiRequest("/api/admin/roles/");
-  },
-
-  // Obtener un rol específico
-  async getRole(id: number): Promise<ApiResponse<{
-    id: number;
-    nombre: string;
-    descripcion: string;
-    es_administrativo: boolean;
-    permisos: string[];
-    fecha_creacion: string;
-    fecha_actualizacion: string;
-  }>> {
+    }>
+  > {
     return apiRequest(`/api/admin/roles/${id}/`);
   },
 
@@ -498,15 +507,17 @@ export const rolesService = {
     descripcion: string;
     es_administrativo: boolean;
     permisos: string[];
-  }): Promise<ApiResponse<{
-    id: number;
-    nombre: string;
-    descripcion: string;
-    es_administrativo: boolean;
-    permisos: string[];
-    fecha_creacion: string;
-    fecha_actualizacion: string;
-  }>> {
+  }): Promise<
+    ApiResponse<{
+      id: number;
+      nombre: string;
+      descripcion: string;
+      es_administrativo: boolean;
+      permisos: string[];
+      fecha_creacion: string;
+      fecha_actualizacion: string;
+    }>
+  > {
     return apiRequest("/api/admin/roles/", {
       method: "POST",
       body: JSON.stringify(data),
@@ -514,20 +525,25 @@ export const rolesService = {
   },
 
   // Actualizar un rol
-  async updateRole(id: number, data: {
-    nombre: string;
-    descripcion: string;
-    es_administrativo: boolean;
-    permisos: string[];
-  }): Promise<ApiResponse<{
-    id: number;
-    nombre: string;
-    descripcion: string;
-    es_administrativo: boolean;
-    permisos: string[];
-    fecha_creacion: string;
-    fecha_actualizacion: string;
-  }>> {
+  async updateRole(
+    id: number,
+    data: {
+      nombre: string;
+      descripcion: string;
+      es_administrativo: boolean;
+      permisos: string[];
+    }
+  ): Promise<
+    ApiResponse<{
+      id: number;
+      nombre: string;
+      descripcion: string;
+      es_administrativo: boolean;
+      permisos: string[];
+      fecha_creacion: string;
+      fecha_actualizacion: string;
+    }>
+  > {
     return apiRequest(`/api/admin/roles/${id}/`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -542,15 +558,20 @@ export const rolesService = {
   },
 
   // Obtener permisos disponibles
-  async getAvailablePermissions(): Promise<ApiResponse<{
-    permisos: Array<[string, string]>;
-    grupos_permisos: Record<string, string[]>;
-  }>> {
+  async getAvailablePermissions(): Promise<
+    ApiResponse<{
+      permisos: Array<[string, string]>;
+      grupos_permisos: Record<string, string[]>;
+    }>
+  > {
     return apiRequest("/api/admin/roles/permisos_disponibles/");
   },
 
   // Asignar permisos a un rol
-  async assignPermissions(roleId: number, permisos: string[]): Promise<ApiResponse> {
+  async assignPermissions(
+    roleId: number,
+    permisos: string[]
+  ): Promise<ApiResponse> {
     return apiRequest(`/api/admin/roles/${roleId}/asignar_permisos/`, {
       method: "POST",
       body: JSON.stringify({ permisos }),
@@ -566,7 +587,10 @@ export const rolesService = {
   },
 
   // Quitar un permiso de un rol
-  async removePermission(roleId: number, permiso: string): Promise<ApiResponse> {
+  async removePermission(
+    roleId: number,
+    permiso: string
+  ): Promise<ApiResponse> {
     return apiRequest(`/api/admin/roles/${roleId}/quitar_permiso/`, {
       method: "POST",
       body: JSON.stringify({ permiso }),
@@ -574,16 +598,18 @@ export const rolesService = {
   },
 
   // Obtener estadísticas de roles
-  async getStatistics(): Promise<ApiResponse<{
-    total_roles: number;
-    roles_administrativos: number;
-    roles_clientes: number;
-    permisos_por_rol: Array<{
-      rol: string;
-      permisos_count: number;
-      permisos: string[];
-    }>;
-  }>> {
+  async getStatistics(): Promise<
+    ApiResponse<{
+      total_roles: number;
+      roles_administrativos: number;
+      roles_clientes: number;
+      permisos_por_rol: Array<{
+        rol: string;
+        permisos_count: number;
+        permisos: string[];
+      }>;
+    }>
+  > {
     return apiRequest("/api/admin/roles/estadisticas/");
   },
 };
@@ -591,10 +617,12 @@ export const rolesService = {
 // Servicios para gestión de permisos (solo lectura desde el backend)
 export const permissionsService = {
   // Obtener todos los permisos disponibles
-  async getAvailablePermissions(): Promise<ApiResponse<{
-    permisos: Array<[string, string]>;
-    grupos_permisos: Record<string, string[]>;
-  }>> {
+  async getAvailablePermissions(): Promise<
+    ApiResponse<{
+      permisos: Array<[string, string]>;
+      grupos_permisos: Record<string, string[]>;
+    }>
+  > {
     return apiRequest("/api/admin/roles/permisos_disponibles/");
   },
 };
@@ -602,11 +630,45 @@ export const permissionsService = {
 // Servicios para gestión de usuarios
 export const usersService = {
   // Obtener todos los usuarios
-  async getUsers(): Promise<ApiResponse<{
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Array<{
+  async getUsers(): Promise<
+    ApiResponse<{
+      count: number;
+      next: string | null;
+      previous: string | null;
+      results: Array<{
+        id: number;
+        username: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+        telefono?: string;
+        direccion?: string;
+        ci?: string;
+        fecha_nacimiento?: string;
+        is_admin_portal: boolean;
+        puede_acceder_admin: boolean;
+        personal?: number;
+        conductor?: number;
+        rol?: {
+          id: number;
+          nombre: string;
+          es_administrativo: boolean;
+          permisos: string[];
+        };
+        es_activo: boolean;
+        fecha_creacion: string;
+        fecha_ultimo_acceso?: string;
+        codigo_empleado?: string;
+        departamento?: string;
+      }>;
+    }>
+  > {
+    return apiRequest("/api/admin/users/");
+  },
+
+  // Obtener un usuario específico
+  async getUser(id: number): Promise<
+    ApiResponse<{
       id: number;
       username: string;
       email: string;
@@ -631,38 +693,8 @@ export const usersService = {
       fecha_ultimo_acceso?: string;
       codigo_empleado?: string;
       departamento?: string;
-    }>;
-  }>> {
-    return apiRequest("/api/admin/users/");
-  },
-
-  // Obtener un usuario específico
-  async getUser(id: number): Promise<ApiResponse<{
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    telefono?: string;
-    direccion?: string;
-    ci?: string;
-    fecha_nacimiento?: string;
-    is_admin_portal: boolean;
-    puede_acceder_admin: boolean;
-    personal?: number;
-    conductor?: number;
-    rol?: {
-      id: number;
-      nombre: string;
-      es_administrativo: boolean;
-      permisos: string[];
-    };
-    es_activo: boolean;
-    fecha_creacion: string;
-    fecha_ultimo_acceso?: string;
-    codigo_empleado?: string;
-    departamento?: string;
-  }>> {
+    }>
+  > {
     return apiRequest(`/api/admin/users/${id}/`);
   },
 
@@ -684,32 +716,34 @@ export const usersService = {
     conductor_id?: number;
     codigo_empleado?: string;
     departamento?: string;
-  }): Promise<ApiResponse<{
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    telefono?: string;
-    direccion?: string;
-    ci?: string;
-    fecha_nacimiento?: string;
-    is_admin_portal: boolean;
-    puede_acceder_admin: boolean;
-    personal?: number;
-    conductor?: number;
-    rol?: {
+  }): Promise<
+    ApiResponse<{
       id: number;
-      nombre: string;
-      es_administrativo: boolean;
-      permisos: string[];
-    };
-    es_activo: boolean;
-    fecha_creacion: string;
-    fecha_ultimo_acceso?: string;
-    codigo_empleado?: string;
-    departamento?: string;
-  }>> {
+      username: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      telefono?: string;
+      direccion?: string;
+      ci?: string;
+      fecha_nacimiento?: string;
+      is_admin_portal: boolean;
+      puede_acceder_admin: boolean;
+      personal?: number;
+      conductor?: number;
+      rol?: {
+        id: number;
+        nombre: string;
+        es_administrativo: boolean;
+        permisos: string[];
+      };
+      es_activo: boolean;
+      fecha_creacion: string;
+      fecha_ultimo_acceso?: string;
+      codigo_empleado?: string;
+      departamento?: string;
+    }>
+  > {
     return apiRequest("/api/admin/users/", {
       method: "POST",
       body: JSON.stringify(data),
@@ -717,49 +751,54 @@ export const usersService = {
   },
 
   // Actualizar un usuario
-  async updateUser(id: number, data: {
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    rol_id: number;
-    telefono?: string;
-    direccion?: string;
-    ci?: string;
-    fecha_nacimiento?: string;
-    is_admin_portal?: boolean;
-    personal_id?: number;
-    conductor_id?: number;
-    password?: string;
-    password_confirm?: string;
-    codigo_empleado?: string;
-    departamento?: string;
-  }): Promise<ApiResponse<{
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    telefono?: string;
-    direccion?: string;
-    ci?: string;
-    fecha_nacimiento?: string;
-    is_admin_portal: boolean;
-    puede_acceder_admin: boolean;
-    personal?: number;
-    conductor?: number;
-    rol?: {
+  async updateUser(
+    id: number,
+    data: {
+      username: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      rol_id: number;
+      telefono?: string;
+      direccion?: string;
+      ci?: string;
+      fecha_nacimiento?: string;
+      is_admin_portal?: boolean;
+      personal_id?: number;
+      conductor_id?: number;
+      password?: string;
+      password_confirm?: string;
+      codigo_empleado?: string;
+      departamento?: string;
+    }
+  ): Promise<
+    ApiResponse<{
       id: number;
-      nombre: string;
-      es_administrativo: boolean;
-      permisos: string[];
-    };
-    es_activo: boolean;
-    fecha_creacion: string;
-    fecha_ultimo_acceso?: string;
-    codigo_empleado?: string;
-    departamento?: string;
-  }>> {
+      username: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      telefono?: string;
+      direccion?: string;
+      ci?: string;
+      fecha_nacimiento?: string;
+      is_admin_portal: boolean;
+      puede_acceder_admin: boolean;
+      personal?: number;
+      conductor?: number;
+      rol?: {
+        id: number;
+        nombre: string;
+        es_administrativo: boolean;
+        permisos: string[];
+      };
+      es_activo: boolean;
+      fecha_creacion: string;
+      fecha_ultimo_acceso?: string;
+      codigo_empleado?: string;
+      departamento?: string;
+    }>
+  > {
     return apiRequest(`/api/admin/users/${id}/`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -782,27 +821,35 @@ export const usersService = {
   },
 
   // Obtener personal disponible para autocompletado
-  async getPersonalDisponible(): Promise<ApiResponse<Array<{
-    id: number;
-    nombre: string;
-    apellido: string;
-    email: string;
-    ci: string;
-    telefono: string;
-  }>>> {
+  async getPersonalDisponible(): Promise<
+    ApiResponse<
+      Array<{
+        id: number;
+        nombre: string;
+        apellido: string;
+        email: string;
+        ci: string;
+        telefono: string;
+      }>
+    >
+  > {
     return apiRequest("/api/admin/users/personal_disponible/");
   },
 
   // Obtener conductores disponibles para autocompletado
-  async getConductoresDisponibles(): Promise<ApiResponse<Array<{
-    id: number;
-    personal__nombre: string;
-    personal__apellido: string;
-    personal__email: string;
-    personal__ci: string;
-    personal__telefono: string;
-    nro_licencia: string;
-  }>>> {
+  async getConductoresDisponibles(): Promise<
+    ApiResponse<
+      Array<{
+        id: number;
+        personal__nombre: string;
+        personal__apellido: string;
+        personal__email: string;
+        personal__ci: string;
+        personal__telefono: string;
+        nro_licencia: string;
+      }>
+    >
+  > {
     return apiRequest("/api/admin/users/conductores_disponibles/");
   },
 };

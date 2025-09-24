@@ -57,12 +57,13 @@ const CodeVerificationPage: React.FC = () => {
   const sendVerificationCode = async () => {
     try {
       await api.post("/api/admin/mobile/send-code/", { email });
-      
+
       setSuccess("Código de verificación enviado exitosamente");
       setError(null);
       setResendCountdown(60); // 60 segundos de espera
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || "Error al enviar código";
+      const errorMessage =
+        error.response?.data?.error || "Error al enviar código";
       setError(errorMessage);
       setSuccess(null);
 
@@ -96,7 +97,7 @@ const CodeVerificationPage: React.FC = () => {
 
     try {
       await api.post("/api/admin/mobile/verify-code/", { email, code });
-      
+
       setSuccess("¡Email verificado exitosamente!");
       setTimeout(() => {
         navigate("/admin", {
@@ -107,7 +108,10 @@ const CodeVerificationPage: React.FC = () => {
         });
       }, 2000);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.detail || "Código incorrecto";
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        "Código incorrecto";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -123,11 +127,12 @@ const CodeVerificationPage: React.FC = () => {
 
     try {
       await api.post("/api/admin/mobile/resend-code/", { email });
-      
+
       setSuccess("Código reenviado exitosamente");
       setResendCountdown(60);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || "Error al reenviar código";
+      const errorMessage =
+        error.response?.data?.error || "Error al reenviar código";
       setError(errorMessage);
 
       // Si es error de rate limiting, ajustar el countdown

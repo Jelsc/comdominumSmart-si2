@@ -33,8 +33,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-condominio}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      FRONTEND_URL: ${FRONTEND_URL:-http://127.0.0.1:5173}
-      FRONTEND_URL_ALT: ${FRONTEND_URL_ALT:-http://localhost:5173}
+      # ========== CONFIGURACIÓN AUTOMÁTICA HABILITADA ==========
+      # Las siguientes variables son OPCIONALES - el sistema funciona sin ellas
+      # FRONTEND_URL: ${FRONTEND_URL:-http://127.0.0.1:5173}
+      # FRONTEND_URL_ALT: ${FRONTEND_URL_ALT:-http://localhost:5173}
+      # CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-True}
+      # DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
       GOOGLE_OAUTH2_CLIENT_ID: ${GOOGLE_OAUTH2_CLIENT_ID:-}
       GOOGLE_OAUTH2_CLIENT_SECRET: ${GOOGLE_OAUTH2_CLIENT_SECRET:-}
       REDIS_URL: "redis://redis:6379/0"
@@ -45,7 +49,6 @@ services:
       DEFAULT_FROM_EMAIL: "noreply@condominio.local"
       SITE_ID: "1"
       ACCOUNT_EMAIL_VERIFICATION: "mandatory"
-      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-True}
     depends_on:
       db:
         condition: service_healthy

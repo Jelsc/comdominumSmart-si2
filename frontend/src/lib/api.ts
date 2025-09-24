@@ -2,26 +2,54 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 /**
- * Obtiene la URL base de la API de forma dinámica
- * Prioridad:
- * 1. Variable de entorno VITE_API_URL (si existe)
- * 2. Construcción dinámica usando window.location + puerto 8000
+ * Detecta automáticamente la URL base de la API según el entorno
+ *
+ * DETECCIÓN AUTOMÁTICA:
+ * 🏠 Desarrollo local: localhost:5173 → localhost:8000
+ * 🐳 Docker local: localhost:5173 → localhost:8000
+ * ☁️ Producción/Nube: cualquier-ip:5173 → misma-ip:8000
+ *
+ * PRECEDENCIA:
+ * 1. Variable de entorno VITE_API_URL (override manual)
+ * 2. Detección automática basada en window.location
  */
 export function getApiBaseUrl(): string {
+  // 1. Si hay variable de entorno, úsala (para casos especiales)
   const envUrl = import.meta.env.VITE_API_URL?.trim();
-  if (envUrl) return envUrl.replace(/\/+$/, ''); // sin trailing slash
+  if (envUrl) {
+    console.log("🔧 [API] Usando URL de variable de entorno:", envUrl);
+    return envUrl.replace(/\/+$/, "");
+  }
 
-  // Construcción dinámica para local y producción
+  // 2. Detección automática basada en la ubicación actual
   const { protocol, hostname } = window.location;
-  return `${protocol}//${hostname}:8000`;
+
+  // Determinar la URL de la API automáticamente
+  let apiUrl: string;
+
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    // 🏠 Entorno local (desarrollo o Docker local)
+    apiUrl = `${protocol}//localhost:8000`;
+    console.log("🏠 [API] Entorno local detectado → localhost:8000");
+  } else {
+    // ☁️ Entorno de producción/nube (cualquier IP)
+    apiUrl = `${protocol}//${hostname}:8000`;
+    console.log(
+      "☁️ [API] Entorno de producción detectado →",
+      `${hostname}:8000`
+    );
+  }
+
+  console.log("🎯 [API] URL final de la API:", apiUrl);
+  return apiUrl;
 }
 
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
   withCredentials: true, // habilitado para cookies/CSRF
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
   timeout: 10000, // 10 segundos timeout
 });
@@ -30,10 +58,10 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Asegurar que Content-Type esté presente
-    if (!config.headers['Content-Type']) {
-      config.headers['Content-Type'] = 'application/json';
+    if (!config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
     }
-    
+
     return config;
   },
   (error) => {
@@ -47,15 +75,19 @@ api.interceptors.response.use(
   (err) => {
     // Manejo específico de errores
     let msg = "Error de red";
-    
+
     if (err.response) {
       // Error del servidor
       const status = err.response.status;
       const errorData = err.response.data;
-      
+
       if (status === 400) {
         // Bad Request - mostrar mensaje específico del backend
-        msg = errorData?.detail || errorData?.message || errorData?.error || "Datos inválidos";
+        msg =
+          errorData?.detail ||
+          errorData?.message ||
+          errorData?.error ||
+          "Datos inválidos";
       } else if (status === 401) {
         msg = "No autorizado. Verifica tus credenciales.";
       } else if (status === 403) {
@@ -74,12 +106,12 @@ api.interceptors.response.use(
       // Error en la configuración de la petición
       msg = err.message || "Error inesperado";
     }
-    
+
     // Solo mostrar toast si no es un error de login (lo maneja el componente)
-    if (!err.config?.url?.includes('/login/')) {
+    if (!err.config?.url?.includes("/login/")) {
       toast.error(msg);
     }
-    
+
     return Promise.reject(err);
   }
 );
