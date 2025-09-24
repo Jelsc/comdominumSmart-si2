@@ -32,62 +32,55 @@ import {
 } from '@/components/ui/form';
 import { DatePicker } from '@/components/date-picker';
 import { Loader2 } from 'lucide-react';
-import type { Conductor, ConductorFormData } from '@/types';
+import type { Residente, ResidenteFormData } from '@/types';
 
-// Esquema de validación
-const conductorSchema = z.object({
+// Esquema de validación para residentes
+const residenteSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   apellido: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
-  fecha_nacimiento: z.date().nullable(),
   telefono: z.string().min(8, 'El teléfono debe tener al menos 8 caracteres'),
   email: z.string().email('Email inválido'),
   ci: z.string().min(7, 'La CI debe tener al menos 7 caracteres'),
-  nro_licencia: z.string().min(5, 'El número de licencia debe tener al menos 5 caracteres'),
-  tipo_licencia: z.string().min(1, 'Debe seleccionar un tipo de licencia'),
-  fecha_venc_licencia: z.date().nullable(),
-  experiencia_anios: z.number().min(0, 'La experiencia debe ser mayor o igual a 0'),
-  estado: z.enum(['disponible', 'ocupado', 'descanso', 'inactivo']), // Nuevo campo operacional
-  telefono_emergencia: z.string().optional(),
-  contacto_emergencia: z.string().optional(),
-}) satisfies z.ZodType<ConductorFormData>;
+  unidad_habitacional: z.string().min(1, 'La unidad habitacional es requerida'),
+  tipo: z.enum(['propietario', 'inquilino']),
+  fecha_ingreso: z.date().nullable(),
+  estado: z.enum(['activo', 'inactivo', 'suspendido', 'en_proceso']),
+  usuario: z.number().optional(),
+}) satisfies z.ZodType<ResidenteFormData>;
 
-interface ConductorStoreProps {
+interface ResidenteStoreProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ConductorFormData) => Promise<boolean>;
-  initialData?: Conductor | null;
+  onSubmit: (data: ResidenteFormData) => Promise<boolean>;
+  initialData?: Residente | null;
   loading?: boolean;
 }
 
-export function ConductorStore({ 
+export function ResidenteStore({ 
   isOpen, 
   onClose, 
   onSubmit, 
   initialData, 
   loading = false 
-}: ConductorStoreProps) {
+}: ResidenteStoreProps) {
   const isEdit = !!initialData;
-  const title = isEdit ? 'Editar Conductor' : 'Crear Conductor';
+  const title = isEdit ? 'Editar Residente' : 'Crear Residente';
   const description = isEdit 
-    ? 'Modifica la información del conductor seleccionado' 
-    : 'Agrega un nuevo conductor';
+    ? 'Modifica la información del residente seleccionado' 
+    : 'Agrega un nuevo residente';
 
-  const form = useForm<ConductorFormData>({
-    resolver: zodResolver(conductorSchema),
+  const form = useForm<ResidenteFormData>({
+    resolver: zodResolver(residenteSchema),
     defaultValues: {
       nombre: '',
       apellido: '',
-      fecha_nacimiento: null,
       telefono: '',
       email: '',
       ci: '',
-      nro_licencia: '',
-      tipo_licencia: '',
-      fecha_venc_licencia: null,
-      experiencia_anios: 0,
-      estado: 'disponible', // Nuevo campo operacional
-      telefono_emergencia: undefined,
-      contacto_emergencia: undefined,
+      unidad_habitacional: '',
+      tipo: 'propietario',
+      fecha_ingreso: null,
+      estado: 'activo',
     },
   });
 
@@ -97,42 +90,35 @@ export function ConductorStore({
       form.reset({
         nombre: initialData.nombre,
         apellido: initialData.apellido,
-        fecha_nacimiento: initialData.fecha_nacimiento ? new Date(initialData.fecha_nacimiento) : null,
         telefono: initialData.telefono,
         email: initialData.email,
         ci: initialData.ci,
-        nro_licencia: initialData.nro_licencia,
-        tipo_licencia: initialData.tipo_licencia,
-        fecha_venc_licencia: initialData.fecha_venc_licencia ? new Date(initialData.fecha_venc_licencia) : null,
-        experiencia_anios: initialData.experiencia_anios,
-        estado: initialData.estado, // Nuevo campo operacional
-        telefono_emergencia: initialData.telefono_emergencia || undefined,
-        contacto_emergencia: initialData.contacto_emergencia || undefined,
+        unidad_habitacional: initialData.unidad_habitacional,
+        tipo: initialData.tipo,
+        fecha_ingreso: initialData.fecha_ingreso ? new Date(initialData.fecha_ingreso) : null,
+        estado: initialData.estado,
+        usuario: initialData.usuario,
       });
     } else if (isOpen && !initialData) {
       // Resetear formulario para crear nuevo
       form.reset({
         nombre: '',
         apellido: '',
-        fecha_nacimiento: null,
         telefono: '',
         email: '',
         ci: '',
-        nro_licencia: '',
-        tipo_licencia: '',
-        fecha_venc_licencia: null,
-        experiencia_anios: 0,
-        estado: 'disponible', // Nuevo campo operacional
-        telefono_emergencia: undefined,
-        contacto_emergencia: undefined,
+        unidad_habitacional: '',
+        tipo: 'propietario',
+        fecha_ingreso: null,
+        estado: 'activo',
       });
     }
   }, [isOpen, initialData, form]);
 
-  const handleSubmit = async (data: ConductorFormData) => {
-    // Validación adicional: la fecha de vencimiento es requerida por el backend
-    if (!data.fecha_venc_licencia) {
-      form.setError('fecha_venc_licencia', { type: 'required', message: 'La fecha de vencimiento es requerida' });
+  const handleSubmit = async (data: ResidenteFormData) => {
+    // Validación adicional: la fecha de ingreso es requerida por el backend
+    if (!data.fecha_ingreso) {
+      form.setError('fecha_ingreso', { type: 'required', message: 'La fecha de ingreso es requerida' });
       return;
     }
     const success = await onSubmit(data);
@@ -191,26 +177,6 @@ export function ConductorStore({
                   )}
                 />
 
-                {/* Fecha de Nacimiento */}
-                <FormField
-                  control={form.control}
-                  name="fecha_nacimiento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha de Nacimiento</FormLabel>
-                      <FormControl>
-                        <DatePicker
-                          value={field.value || null}
-                          onChange={field.onChange}
-                          placeholder="Seleccionar fecha"
-                          maxDate={new Date()}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {/* Teléfono */}
                 <FormField
                   control={form.control}
@@ -255,35 +221,35 @@ export function ConductorStore({
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
 
-            {/* Información de Licencia */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Información de Licencia</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Número de Licencia */}
+                {/* Unidad Habitacional */}
                 <FormField
                   control={form.control}
-                  name="nro_licencia"
+                  name="unidad_habitacional"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Número de Licencia *</FormLabel>
+                      <FormLabel>Unidad Habitacional *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Número de licencia" {...field} />
+                        <Input placeholder="Ej: A-101, B-205" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
 
-                {/* Tipo de Licencia */}
+            {/* Información de Residencia */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Información de Residencia</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Tipo de Residente */}
                 <FormField
                   control={form.control}
-                  name="tipo_licencia"
+                  name="tipo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Licencia *</FormLabel>
+                      <FormLabel>Tipo de Residente *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -291,11 +257,8 @@ export function ConductorStore({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="A">Tipo A - Motocicletas</SelectItem>
-                          <SelectItem value="B">Tipo B - Automóviles</SelectItem>
-                          <SelectItem value="C">Tipo C - Camiones</SelectItem>
-                          <SelectItem value="D">Tipo D - Buses</SelectItem>
-                          <SelectItem value="E">Tipo E - Remolques</SelectItem>
+                          <SelectItem value="propietario">Propietario</SelectItem>
+                          <SelectItem value="inquilino">Inquilino</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -303,40 +266,19 @@ export function ConductorStore({
                   )}
                 />
 
-                {/* Fecha de Vencimiento de Licencia */}
+                {/* Fecha de Ingreso */}
                 <FormField
                   control={form.control}
-                  name="fecha_venc_licencia"
+                  name="fecha_ingreso"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha de Vencimiento de Licencia *</FormLabel>
+                      <FormLabel>Fecha de Ingreso *</FormLabel>
                       <FormControl>
                         <DatePicker
-                            value={field.value ?? null}
+                          value={field.value ?? null}
                           onChange={field.onChange}
                           placeholder="Seleccionar fecha"
-                          minDate={new Date("1900-01-01")}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Experiencia en Años */}
-                <FormField
-                  control={form.control}
-                  name="experiencia_anios"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Experiencia (años) *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="0"
-                          placeholder="Años de experiencia"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          maxDate={new Date()}
                         />
                       </FormControl>
                       <FormMessage />
@@ -346,60 +288,24 @@ export function ConductorStore({
               </div>
             </div>
 
-            {/* Información Adicional */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Información Adicional</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Teléfono de Emergencia */}
-                <FormField
-                  control={form.control}
-                  name="telefono_emergencia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teléfono de Emergencia</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Teléfono de emergencia" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Contacto de Emergencia */}
-                <FormField
-                  control={form.control}
-                  name="contacto_emergencia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contacto de Emergencia</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre del contacto" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Estado Operacional */}
+            {/* Estado */}
             <FormField
               control={form.control}
               name="estado"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Estado Operacional *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar estado" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="disponible">Disponible</SelectItem>
-                      <SelectItem value="ocupado">Ocupado</SelectItem>
-                      <SelectItem value="descanso">En Descanso</SelectItem>
+                      <SelectItem value="activo">Activo</SelectItem>
                       <SelectItem value="inactivo">Inactivo</SelectItem>
+                      <SelectItem value="suspendido">Suspendido</SelectItem>
+                      <SelectItem value="en_proceso">En Proceso</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

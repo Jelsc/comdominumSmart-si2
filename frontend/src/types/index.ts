@@ -22,31 +22,27 @@ export type Personal = {
   puede_acceder_sistema: boolean;
 };
 
-export type Conductor = {
+export type Residente = {
   id: number;
   nombre: string;
   apellido: string;
-  fecha_nacimiento: string;
-  telefono: string;
-  email: string;
   ci: string;
-  // Campos específicos de Conductor
-  nro_licencia: string;
-  tipo_licencia: string;
-  fecha_venc_licencia: string;
-  experiencia_anios: number;
-  estado: 'disponible' | 'ocupado' | 'descanso' | 'inactivo'; // Nuevo campo operacional
-  telefono_emergencia?: string;
-  contacto_emergencia?: string;
+  email: string;
+  telefono: string;
+  // Campos específicos de Residente
+  unidad_habitacional: string;
+  tipo: 'propietario' | 'inquilino';
+  fecha_ingreso: string;
+  estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
   fecha_creacion: string;
   fecha_actualizacion: string;
   usuario?: number; // FK a CustomUser (nullable)
+  // Campos del usuario relacionado
+  username?: string;
   // Campos calculados/derivados
   nombre_completo: string;
-  licencia_vencida: boolean;
-  dias_para_vencer_licencia: number;
-  puede_conducir: boolean;
-  estado_usuario: 'activo' | 'inactivo' | 'sin_usuario'; // Estado del usuario vinculado
+  puede_acceder: boolean;
+  estado_usuario: 'activo' | 'inactivo' | 'sin_usuario';
 };
 
 export type Usuario = {
@@ -74,7 +70,7 @@ export type Usuario = {
   fecha_ultimo_acceso?: string;
   // Relaciones opcionales
   personal?: number; // FK a Personal
-  conductor?: number; // FK a Conductor
+  residente?: number; // FK a Residente
   // Campos derivados
   puede_acceder_admin: boolean;
   es_administrativo: boolean;
@@ -115,21 +111,18 @@ export type PersonalFormData = {
   estado?: boolean | undefined; // Cambiado de es_activo a estado
 };
 
-// Conductor no incluye campos laborales de Personal (codigo_empleado, etc.)
-export type ConductorFormData = {
+// Residente no incluye campos laborales de Personal
+export type ResidenteFormData = {
   nombre: string;
   apellido: string;
-  fecha_nacimiento: Date | null;
-  telefono: string;
-  email: string;
   ci: string;
-  nro_licencia: string;
-  fecha_venc_licencia: Date | null;
-  experiencia_anios: number;
-  tipo_licencia: string;
-  estado: 'disponible' | 'ocupado' | 'descanso' | 'inactivo'; // Nuevo campo operacional
-  telefono_emergencia?: string | undefined;
-  contacto_emergencia?: string | undefined;
+  email: string;
+  telefono: string;
+  unidad_habitacional: string;
+  tipo: 'propietario' | 'inquilino';
+  fecha_ingreso: Date | null;
+  estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
+  usuario?: number | undefined;
 };
 
 export type UsuarioFormData = {
@@ -147,7 +140,7 @@ export type UsuarioFormData = {
   is_active: boolean; // Unificado con es_activo
   // Relaciones opcionales
   personal?: number | undefined;
-  conductor?: number | undefined;
+  residente?: number | undefined;
   password?: string | undefined;
   password_confirm?: string | undefined;
 };
@@ -158,10 +151,10 @@ export type PersonalFilters = {
   estado?: boolean; // Cambiado de string a boolean
 };
 
-export type ConductorFilters = {
+export type ResidenteFilters = {
   search?: string;
-  estado?: 'disponible' | 'ocupado' | 'descanso' | 'inactivo';
-  tipo_licencia?: string;
+  estado?: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
+  tipo?: 'propietario' | 'inquilino';
 };
 
 export type UsuarioFilters = {
@@ -196,12 +189,12 @@ export type PersonalOption = {
   telefono: string;
 };
 
-export type ConductorOption = {
+export type ResidenteOption = {
   id: number;
-  nombre: string; // Cambiado de personal__nombre
-  apellido: string; // Cambiado de personal__apellido
-  email: string; // Cambiado de personal__email
-  ci: string; // Cambiado de personal__ci
-  telefono: string; // Cambiado de personal__telefono
-  nro_licencia: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  ci: string;
+  telefono: string;
+  unidad_habitacional: string;
 };

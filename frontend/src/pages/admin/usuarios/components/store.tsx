@@ -29,7 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Loader2, User, Car } from 'lucide-react';
+import { Loader2, User, Home } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Usuario, UsuarioFormData, Role } from '@/types';
 
@@ -47,7 +47,7 @@ const baseUsuarioSchema = z.object({
   is_superuser: z.boolean(),
   is_active: z.boolean(), // Unificado con es_activo
   personal: z.number().optional(),
-  conductor: z.number().optional(),
+  residente: z.number().optional(),
   password: z.string().optional(),
   password_confirm: z.string().optional(),
 }) satisfies z.ZodType<UsuarioFormData>;
@@ -61,14 +61,24 @@ const createUsuarioSchema = baseUsuarioSchema.extend({
   path: ['password_confirm'],
 });
 
-// Editar: password opcional, si se envía debe coincidir
+// Editar: password opcional, si se envía debe coincidir y tener mínimo 6 caracteres
 const editUsuarioSchema = baseUsuarioSchema.refine((data) => {
+  // Si hay una contraseña, verificar que coincidan
   if (data.password || data.password_confirm) {
+    // Verificar que ambos campos estén presentes
+    if (!data.password || !data.password_confirm) {
+      return false;
+    }
+    // Verificar longitud mínima
+    if (data.password.length < 6) {
+      return false;
+    }
+    // Verificar que coincidan
     return data.password === data.password_confirm;
   }
   return true;
 }, {
-  message: 'Las contraseñas deben coincidir',
+  message: 'Las contraseñas deben coincidir y tener al menos 6 caracteres',
   path: ['password_confirm'],
 });
 
@@ -87,14 +97,14 @@ interface UsuarioStoreProps {
     ci: string;
     telefono: string;
   }>;
-  conductoresDisponibles: Array<{
+  residentesDisponibles: Array<{
     id: number;
-    nombre: string; // Cambiado de personal__nombre
-    apellido: string; // Cambiado de personal__apellido
-    email: string; // Cambiado de personal__email
-    ci: string; // Cambiado de personal__ci
-    telefono: string; // Cambiado de personal__telefono
-    nro_licencia: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    ci: string;
+    telefono: string;
+    unidad_habitacional: string;
   }>;
 }
 
@@ -106,7 +116,7 @@ export function UsuarioStore({
   loading = false,
   roles,
   personalDisponible,
-  conductoresDisponibles
+  residentesDisponibles
 }: UsuarioStoreProps) {
   const isEdit = !!initialData;
   const title = isEdit ? 'Editar Usuario' : 'Crear Usuario';
@@ -130,7 +140,7 @@ export function UsuarioStore({
       is_superuser: false,
       is_active: true, // Unificado con es_activo
       personal: undefined,
-      conductor: undefined,
+      residente: undefined,
       password: '',
       password_confirm: '',
     },
@@ -144,15 +154,15 @@ export function UsuarioStore({
         email: initialData.email,
         first_name: initialData.first_name,
         last_name: initialData.last_name,
-        telefono: initialData.telefono,
-        direccion: initialData.direccion,
-        ci: initialData.ci,
+        telefono: initialData.telefono || '',
+        direccion: initialData.direccion || '',
+        ci: initialData.ci || '',
         fecha_nacimiento: initialData.fecha_nacimiento ? new Date(initialData.fecha_nacimiento) : null,
         rol_id: initialData.rol?.id || undefined,
         is_superuser: initialData.is_superuser,
         is_active: initialData.is_active, // Unificado con es_activo
         personal: initialData.personal || undefined,
-        conductor: initialData.conductor || undefined,
+        residente: initialData.residente || undefined,
         password: '',
         password_confirm: '',
       });
@@ -171,7 +181,7 @@ export function UsuarioStore({
         is_superuser: false,
         is_active: true, // Unificado con es_activo
         personal: undefined,
-        conductor: undefined,
+        residente: undefined,
         password: '',
         password_confirm: '',
       });
@@ -191,12 +201,17 @@ export function UsuarioStore({
     onClose();
   };
 
-  const handlePersonalSelect = (personalId: number) => {
+  const handlePersonalSelect = (personalId: number | undefined) => {
+    if (personalId === undefined) {
+      form.setValue('personal', undefined);
+      return;
+    }
+    
     const personal = personalDisponible.find(p => p.id === personalId);
     if (personal) {
       form.setValue('personal', personalId);
-      // Si selecciona personal, desvincular conductor para evitar conflictos
-      form.setValue('conductor', undefined, { shouldDirty: true, shouldValidate: true });
+      // Si selecciona personal, desvincular residente para evitar conflictos
+      form.setValue('residente', undefined, { shouldDirty: true, shouldValidate: true });
       form.setValue('first_name', personal.nombre);
       form.setValue('last_name', personal.apellido);
       form.setValue('email', personal.email);
@@ -205,22 +220,27 @@ export function UsuarioStore({
     }
   };
 
-  const handleConductorSelect = (conductorId: number) => {
-    const conductor = conductoresDisponibles.find(c => c.id === conductorId);
-    if (conductor) {
-      form.setValue('conductor', conductorId, { shouldDirty: true, shouldValidate: true });
-      // Si selecciona conductor, desvincular personal para evitar conflictos
+  const handleResidenteSelect = (residenteId: number | undefined) => {
+    if (residenteId === undefined) {
+      form.setValue('residente', undefined);
+      return;
+    }
+    
+    const residente = residentesDisponibles.find(r => r.id === residenteId);
+    if (residente) {
+      form.setValue('residente', residenteId, { shouldDirty: true, shouldValidate: true });
+      // Si selecciona residente, desvincular personal para evitar conflictos
       form.setValue('personal', undefined, { shouldDirty: true, shouldValidate: true });
-      form.setValue('first_name', conductor.nombre); // Cambiado de personal__nombre
-      form.setValue('last_name', conductor.apellido); // Cambiado de personal__apellido
-      form.setValue('email', conductor.email); // Cambiado de personal__email
-      form.setValue('telefono', conductor.telefono); // Cambiado de personal__telefono
-      form.setValue('ci', conductor.ci);
+      form.setValue('first_name', residente.nombre);
+      form.setValue('last_name', residente.apellido);
+      form.setValue('email', residente.email);
+      form.setValue('telefono', residente.telefono);
+      form.setValue('ci', residente.ci);
     }
   };
 
   const selectedPersonal = personalDisponible.find(p => p.id === form.watch('personal'));
-  const selectedConductor = conductoresDisponibles.find(c => c.id === form.watch('conductor'));
+  const selectedResidente = residentesDisponibles.find(r => r.id === form.watch('residente'));
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -348,12 +368,13 @@ export function UsuarioStore({
                     <Select
                       onValueChange={(value) => {
                         const personalId = value ? parseInt(value) : undefined;
-                        handlePersonalSelect(personalId!);
+                        handlePersonalSelect(personalId);
                       }}
-                      value={field.value ? String(field.value) : ""}
+                      value={field.value !== undefined ? String(field.value) : ""}
+                      disabled={isEdit} // Deshabilitar en modo edición
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className={isEdit ? "bg-gray-100" : ""}>
                           <SelectValue placeholder="Seleccionar personal..." />
                         </SelectTrigger>
                       </FormControl>
@@ -375,41 +396,46 @@ export function UsuarioStore({
                         ))}
                       </SelectContent>
                     </Select>
+                    {isEdit && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        La asociación de personal no puede modificarse durante la edición
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Conductor (Select simple) */}
+              {/* Residente (Select simple) */}
               <FormField
                 control={form.control}
-                name="conductor"
+                name="residente"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Conductor (Opcional)</FormLabel>
+                    <FormLabel>Residente (Opcional)</FormLabel>
                     <Select
                       onValueChange={(value) => {
-                        const conductorId = value ? parseInt(value) : undefined;
-                        handleConductorSelect(conductorId!);
+                        const residenteId = value ? parseInt(value) : undefined;
+                        handleResidenteSelect(residenteId);
                       }}
-                      value={field.value ? String(field.value) : ""}
+                      value={field.value !== undefined ? String(field.value) : ""}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar conductor..." />
+                          <SelectValue placeholder="Seleccionar residente..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-[200px] overflow-y-auto">
-                        {conductoresDisponibles.map((conductor) => (
-                          <SelectItem key={conductor.id} value={String(conductor.id)}>
+                        {residentesDisponibles.map((residente) => (
+                          <SelectItem key={residente.id} value={String(residente.id)}>
                             <div className="flex items-center gap-2">
-                              <Car className="h-4 w-4" />
+                              <Home className="h-4 w-4" />
                               <div>
                                 <div className="font-medium">
-                                  {conductor.nombre} {conductor.apellido}
+                                  {residente.nombre} {residente.apellido}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  CI: {conductor.ci}
+                                  CI: {residente.ci} - Unidad: {residente.unidad_habitacional}
                                 </div>
                               </div>
                             </div>
@@ -423,18 +449,22 @@ export function UsuarioStore({
               />
             </div>
 
-            {/* Contraseñas (solo para creación) */}
-            {!isEdit && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Contraseñas (para creación son obligatorias, para edición son opcionales) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contraseña *</FormLabel>
+                      <FormLabel>{isEdit ? "Nueva Contraseña (opcional)" : "Contraseña *"}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Contraseña" {...field} />
+                        <Input type="password" placeholder={isEdit ? "Dejar en blanco para mantener" : "Contraseña"} {...field} />
                       </FormControl>
+                      {isEdit && (
+                        <p className="text-xs text-muted-foreground">
+                          Dejar en blanco si no desea cambiar la contraseña
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -445,16 +475,15 @@ export function UsuarioStore({
                   name="password_confirm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirmar Contraseña *</FormLabel>
+                      <FormLabel>{isEdit ? "Confirmar Nueva Contraseña" : "Confirmar Contraseña *"}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Confirmar contraseña" {...field} />
+                        <Input type="password" placeholder={isEdit ? "Dejar en blanco para mantener" : "Confirmar contraseña"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-            )}
 
             {/* Dirección */}
             <FormField

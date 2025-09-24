@@ -46,16 +46,16 @@ class CanManagePersonal(permissions.BasePermission):
         return request.user.tiene_permiso("gestionar_personal")
 
 
-class CanManageConductores(permissions.BasePermission):
+class CanManageResidentes(permissions.BasePermission):
     """
-    Permiso para gestionar conductores.
+    Permiso para gestionar residentes.
     """
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        return request.user.tiene_permiso("gestionar_conductores")
+        return request.user.tiene_permiso("gestionar_residentes")
 
 
 class CanManageRoles(permissions.BasePermission):

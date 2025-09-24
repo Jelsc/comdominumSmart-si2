@@ -26,14 +26,14 @@ interface UseUsuariosState {
     ci: string;
     telefono: string;
   }>;
-  conductoresDisponibles: Array<{
+  residentesDisponibles: Array<{
     id: number;
-    nombre: string; // Cambiado de personal__nombre
-    apellido: string; // Cambiado de personal__apellido
-    email: string; // Cambiado de personal__email
-    ci: string; // Cambiado de personal__ci
-    telefono: string; // Cambiado de personal__telefono
-    nro_licencia: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    ci: string;
+    telefono: string;
+    unidad_habitacional: string;
   }>;
 }
 
@@ -57,7 +57,7 @@ interface UseUsuariosActions {
   // Utility functions
   loadRoles: () => Promise<void>;
   loadPersonalDisponible: () => Promise<void>;
-  loadConductoresDisponibles: () => Promise<void>;
+  loadResidentesDisponibles: () => Promise<void>;
 }
 
 export function useUsuarios(): UseUsuariosState & UseUsuariosActions {
@@ -71,7 +71,7 @@ export function useUsuarios(): UseUsuariosState & UseUsuariosActions {
     filters: {},
     roles: [],
     personalDisponible: [],
-    conductoresDisponibles: [],
+    residentesDisponibles: [],
   });
 
   const loadData = useCallback(async (filters?: UsuarioFilters) => {
@@ -301,6 +301,10 @@ export function useUsuarios(): UseUsuariosState & UseUsuariosActions {
       }
     } catch (error) {
       console.error('Error al cargar roles:', error);
+      // Los roles son necesarios, pero no queremos bloquear toda la interfaz
+      // así que establecemos un array vacío y mostramos un aviso en la consola
+      toast.error('No se pudieron cargar los roles. Algunas funciones pueden estar limitadas.');
+      setState(prev => ({ ...prev, roles: [] }));
     }
   }, []);
 
@@ -313,24 +317,36 @@ export function useUsuarios(): UseUsuariosState & UseUsuariosActions {
           ...prev, 
           personalDisponible: response.data! 
         }));
+      } else if (response.error) {
+        // Si el backend devuelve un error explícito (como un 403)
+        console.warn('No se pudo cargar el personal disponible:', response.error);
       }
     } catch (error) {
-      console.error('Error al cargar personal disponible:', error);
+      // Manejo silencioso del error, este es un recurso opcional
+      console.warn('No se pudo cargar el personal disponible. Puede ser un problema de permisos:', error);
+      // No mostramos el error en la interfaz ya que este recurso es opcional
+      setState(prev => ({ ...prev, personalDisponible: [] }));
     }
   }, []);
 
-  const loadConductoresDisponibles = useCallback(async () => {
+  const loadResidentesDisponibles = useCallback(async () => {
     try {
-      const response = await usuariosApi.getConductoresDisponibles();
+      const response = await usuariosApi.getResidentesDisponibles();
       
       if (response.success && response.data) {
         setState(prev => ({ 
           ...prev, 
-          conductoresDisponibles: response.data! 
+          residentesDisponibles: response.data! 
         }));
+      } else if (response.error) {
+        // Si el backend devuelve un error explícito (como un 403)
+        console.warn('No se pudo cargar los residentes disponibles:', response.error);
       }
     } catch (error) {
-      console.error('Error al cargar conductores disponibles:', error);
+      // Manejo silencioso del error, este es un recurso opcional
+      console.warn('No se pudo cargar los residentes disponibles. Puede ser un problema de permisos:', error);
+      // No mostramos el error en la interfaz ya que este recurso es opcional
+      setState(prev => ({ ...prev, residentesDisponibles: [] }));
     }
   }, []);
 
@@ -350,6 +366,6 @@ export function useUsuarios(): UseUsuariosState & UseUsuariosActions {
     clearError,
     loadRoles,
     loadPersonalDisponible,
-    loadConductoresDisponibles,
+    loadResidentesDisponibles,
   };
 }

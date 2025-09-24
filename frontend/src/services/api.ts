@@ -836,21 +836,20 @@ export const usersService = {
     return apiRequest("/api/admin/users/personal_disponible/");
   },
 
-  // Obtener conductores disponibles para autocompletado
-  async getConductoresDisponibles(): Promise<
+  async getResidentesDisponibles(): Promise<
     ApiResponse<
       Array<{
-        id: number;
-        personal__nombre: string;
-        personal__apellido: string;
-        personal__email: string;
-        personal__ci: string;
-        personal__telefono: string;
-        nro_licencia: string;
-      }>
-    >
+      id: number;
+      personal__nombre: string;
+      personal__apellido: string;
+      personal__email: string;
+      personal__ci: string;
+      personal__telefono: string;
+      nro_licencia: string;
+    }>
+   >
   > {
-    return apiRequest("/api/admin/users/conductores_disponibles/");
+    return apiRequest("/api/admin/users/residentes_disponibles/");
   },
 };
 

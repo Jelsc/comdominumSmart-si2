@@ -22,7 +22,7 @@ class RolSeeder(BaseSeeder):
             roles_data = [
                 {
                     "nombre": "Cliente",
-                    "descripcion": "Usuario final que utiliza el servicio de transporte",
+                    "descripcion": "Usuario final que utiliza los servicios del condominio",
                     "es_administrativo": False,
                     "permisos": GRUPOS_PERMISOS["cliente"],
                 },
@@ -39,10 +39,10 @@ class RolSeeder(BaseSeeder):
                     "permisos": GRUPOS_PERMISOS["supervisor"],
                 },
                 {
-                    "nombre": "Conductor",
-                    "descripcion": "Conductor del sistema",
+                    "nombre": "Residente",
+                    "descripcion": "Residente del condominio",
                     "es_administrativo": False,
-                    "permisos": GRUPOS_PERMISOS["conductor"],
+                    "permisos": GRUPOS_PERMISOS["residente"],
                 },
                 {
                     "nombre": "Operador",
@@ -84,7 +84,7 @@ class RolSeeder(BaseSeeder):
                 "Cliente",
                 "Administrador",
                 "Supervisor",
-                "Conductor",
+                "Residente",
                 "Operador",
             ]
             roles_existentes = set(Rol.objects.values_list("nombre", flat=True))

@@ -24,21 +24,21 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination';
-import { MoreHorizontal, Edit, Trash2, Eye, AlertTriangle } from 'lucide-react';
-import type { Conductor } from '@/types';
+import { MoreHorizontal, Edit, Trash2, Eye, Home } from 'lucide-react';
+import type { Residente } from '@/types';
 
-interface ConductorTableProps {
-  data: Conductor[];
+interface ResidenteTableProps {
+  data: Residente[];
   loading: boolean;
-  onEdit: (item: Conductor) => void;
-  onDelete: (item: Conductor) => void;
-  onView?: (item: Conductor) => void;
+  onEdit: (item: Residente) => void;
+  onDelete: (item: Residente) => void;
+  onView?: (item: Residente) => void;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-export function ConductorTable({ 
+export function ResidenteTable({ 
   data, 
   loading, 
   onEdit, 
@@ -47,7 +47,7 @@ export function ConductorTable({
   page,
   totalPages,
   onPageChange
-}: ConductorTableProps) {
+}: ResidenteTableProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -56,62 +56,19 @@ export function ConductorTable({
     });
   };
 
-  const getStatusBadge = (esActivo: boolean) => {
-    return (
-      <Badge variant={esActivo ? "default" : "secondary"}>
-        {esActivo ? "Activo" : "Inactivo"}
-      </Badge>
-    );
-  };
-
-  const getLicenseStatusBadge = (fechaVencimiento: string) => {
-    const today = new Date();
-    const vencimiento = new Date(fechaVencimiento);
-    const diasRestantes = Math.ceil((vencimiento.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diasRestantes < 0) {
-      return (
-        <Badge variant="outline" className="text-red-600 border-red-600">
-          <AlertTriangle className="h-3 w-3" />
-          Vencida
-        </Badge>
-      );
-    } else if (diasRestantes <= 30) {
-      return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-          Por vencer ({diasRestantes} días)
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="outline" className="text-green-600 border-green-600">
-          Vigente
-        </Badge>
-      );
-    }
-  };
-
-  const getLicenseNumberBadge = (nroLicencia: string) => {
-    return (
-      <Badge variant="outline" className="font-mono">
-        {nroLicencia}
-      </Badge>
-    );
-  };
-
-  const getOperationalStatusBadge = (estado: string) => {
+  const getStatusBadge = (estado: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      'disponible': 'default',
-      'ocupado': 'secondary',
-      'descanso': 'outline',
-      'inactivo': 'destructive',
+      'activo': 'default',
+      'inactivo': 'secondary',
+      'suspendido': 'destructive',
+      'en_proceso': 'outline',
     };
 
     const labels: Record<string, string> = {
-      'disponible': 'Disponible',
-      'ocupado': 'Ocupado',
-      'descanso': 'Descanso',
+      'activo': 'Activo',
       'inactivo': 'Inactivo',
+      'suspendido': 'Suspendido',
+      'en_proceso': 'En Proceso',
     };
 
     return (
@@ -121,6 +78,32 @@ export function ConductorTable({
     );
   };
 
+  const getTipoBadge = (tipo: string) => {
+    const variants: Record<string, "default" | "secondary"> = {
+      'propietario': 'default',
+      'inquilino': 'secondary',
+    };
+
+    const labels: Record<string, string> = {
+      'propietario': 'Propietario',
+      'inquilino': 'Inquilino',
+    };
+
+    return (
+      <Badge variant={variants[tipo] || 'outline'}>
+        {labels[tipo] || tipo}
+      </Badge>
+    );
+  };
+
+  const getUnidadBadge = (unidad: string) => {
+    return (
+      <Badge variant="outline" className="font-mono">
+        <Home className="h-3 w-3 mr-1" />
+        {unidad}
+      </Badge>
+    );
+  };
 
   if (loading) {
     return (
@@ -135,7 +118,7 @@ export function ConductorTable({
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No se encontraron conductores registrados
+        No se encontraron residentes registrados
       </div>
     );
   }
@@ -149,34 +132,33 @@ export function ConductorTable({
               <TableHead>Nombre Completo</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
-              <TableHead>Nro. Licencia</TableHead>
-              <TableHead>Vencimiento Licencia</TableHead>
-              <TableHead>Experiencia</TableHead>
-              <TableHead>Estado Operacional</TableHead>
+              <TableHead>CI</TableHead>
+              <TableHead>Unidad Habitacional</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Fecha de Ingreso</TableHead>
+              <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((conductor) => (
-              <TableRow key={conductor.id}>
+            {data.map((residente) => (
+              <TableRow key={residente.id}>
                 <TableCell className="font-medium">
-                  {conductor.nombre} {conductor.apellido}
+                  {residente.nombre} {residente.apellido}
                 </TableCell>
-                <TableCell>{conductor.email}</TableCell>
-                <TableCell>{conductor.telefono}</TableCell>
-                <TableCell>{getLicenseNumberBadge(conductor.nro_licencia)}</TableCell>
+                <TableCell>{residente.email}</TableCell>
+                <TableCell>{residente.telefono}</TableCell>
                 <TableCell>
-                  <div className="space-y-1">
-                    <div className="text-sm">{formatDate(conductor.fecha_venc_licencia)}</div>
-                    {getLicenseStatusBadge(conductor.fecha_venc_licencia)}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {conductor.experiencia_anios} años
+                  <Badge variant="outline" className="font-mono">
+                    {residente.ci}
                   </Badge>
                 </TableCell>
-                <TableCell>{getOperationalStatusBadge(conductor.estado)}</TableCell>
+                <TableCell>{getUnidadBadge(residente.unidad_habitacional)}</TableCell>
+                <TableCell>{getTipoBadge(residente.tipo)}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{formatDate(residente.fecha_ingreso)}</div>
+                </TableCell>
+                <TableCell>{getStatusBadge(residente.estado)}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -186,17 +168,17 @@ export function ConductorTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {onView && (
-                        <DropdownMenuItem onClick={() => onView(conductor)}>
+                        <DropdownMenuItem onClick={() => onView(residente)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Ver detalles
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => onEdit(conductor)}>
+                      <DropdownMenuItem onClick={() => onEdit(residente)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => onDelete(conductor)}
+                        onClick={() => onDelete(residente)}
                         className="text-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />

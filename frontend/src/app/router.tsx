@@ -6,7 +6,7 @@ import PermisosCRUD from "../pages/admin/usuarios/roles-permisos/permiso";
 import RolForm from "../pages/admin/usuarios/roles-permisos/rol";
 import BitacoraPage from "@/pages/admin/bitacora.page";
 import PersonalPage from "../pages/admin/personal/personal.page";
-import ConductoresPage from "../pages/admin/conductores/driver.page";
+import ResidentesPage from "../pages/admin/residentes/residentes.page";
 import UsuariosPage from "../pages/admin/usuarios/users.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 
@@ -68,10 +68,10 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/admin/conductores"
+          path="/admin/residentes"
           element={
             <ProtectedRoute requireAdmin={true}>
-              <ConductoresPage />
+              <ResidentesPage />
             </ProtectedRoute>
           }
         />

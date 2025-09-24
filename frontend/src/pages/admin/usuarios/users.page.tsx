@@ -8,6 +8,7 @@ import { UsuarioFiltersComponent } from './components/filters';
 import { UsuarioStore } from './components/store';
 import { UsuarioDelete } from './components/delete';
 import AdminLayout from '@/app/layout/admin-layout';
+import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,7 +28,7 @@ export default function UsuariosPage() {
     isDeleteModalOpen,
     roles,
     personalDisponible,
-    conductoresDisponibles,
+    residentesDisponibles,
     createItem,
     updateItem,
     deleteItem,
@@ -39,7 +40,7 @@ export default function UsuariosPage() {
     clearError,
     loadRoles,
     loadPersonalDisponible,
-    loadConductoresDisponibles,
+    loadResidentesDisponibles,
     loadData,
   } = useUsuarios();
 
@@ -65,16 +66,25 @@ export default function UsuariosPage() {
 
   // Cargar datos al montar el componente y cuando cambien los filtros
   useEffect(() => {
+    // Cargar datos principales (usuarios y roles)
     fetchUsuarios(page, searchDebounced, rolFilter, activeFilter);
     loadRoles();
+    
+    // Cargar datos opcionales que podrían tener problemas de permisos
+    // usando try-catch separados para que si uno falla, el otro aún se ejecute
     loadPersonalDisponible();
-    loadConductoresDisponibles();
+    loadResidentesDisponibles();
   }, [page, searchDebounced, rolFilter, activeFilter]);
 
   const totalPages = Math.ceil((data?.count || 0) / ITEMS_PER_PAGE);
 
 
   const handleCreate = () => {
+    // Verificar si hay roles disponibles antes de abrir el modal
+    if (roles.length === 0) {
+      toast.error('No se pudieron cargar los roles necesarios para crear un usuario. Verifique sus permisos e intente nuevamente.');
+      return;
+    }
     openStoreModal();
   };
 
@@ -179,6 +189,7 @@ export default function UsuariosPage() {
           onSearchChange={setSearch}
           onRolFilterChange={setRolFilter}
           onActiveFilterChange={setActiveFilter}
+          roles={roles}
           loading={loading}
         />
 
@@ -227,7 +238,7 @@ export default function UsuariosPage() {
           loading={loading}
           roles={roles}
           personalDisponible={personalDisponible}
-          conductoresDisponibles={conductoresDisponibles}
+          residentesDisponibles={residentesDisponibles}
         />
 
         <UsuarioDelete
