@@ -30,22 +30,75 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-dev")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
+# ========== CONFIGURACIÓN AUTOMÁTICA DE HOSTS ==========
+def get_allowed_hosts():
+    """
+    Configura automáticamente los hosts permitidos:
+    - Desarrollo: localhost, 127.0.0.1
+    - Docker: 0.0.0.0 y localhost
+    - Producción: cualquier host (*) - Django se encarga de la validación
+    """
+    env_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "")
+    
+    if env_hosts and env_hosts.strip():
+        # Si hay hosts específicos en la variable de entorno
+        hosts = [host.strip() for host in env_hosts.split(",") if host.strip()]
+        print(f"🔧 [Django] Hosts configurados por variable de entorno: {hosts}")
+        return hosts
+    
+    # Configuración automática por defecto para máxima compatibilidad
+    default_hosts = ["*"]  # Permitir cualquier host - más flexible para contenedores y nube
+    print(f"🌐 [Django] Hosts automáticos configurados: {default_hosts}")
+    return default_hosts
 
-# Configuración de URLs del frontend
+ALLOWED_HOSTS = get_allowed_hosts()
+
+# ========== CONFIGURACIÓN AUTOMÁTICA DE CORS ==========
+def configure_cors():
+    """
+    Configura CORS automáticamente:
+    - Permite todos los orígenes por defecto para máxima compatibilidad
+    - Puede ser sobreescrito con variables de entorno
+    """
+    # Por defecto permitir todos los orígenes para máxima compatibilidad
+    allow_all = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True") == "True"
+    
+    if allow_all:
+        print("🌍 [Django] CORS configurado para permitir TODOS los orígenes")
+        return True, []
+    else:
+        # URLs específicas si se desactiva allow_all
+        frontend_urls = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173", 
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            # Emulador Android
+            "http://10.0.2.2:5173",
+            "http://10.0.2.2:8000"
+        ]
+        
+        # Agregar URLs de variables de entorno si existen
+        env_frontend = os.getenv("FRONTEND_URL")
+        env_frontend_alt = os.getenv("FRONTEND_URL_ALT")
+        
+        if env_frontend:
+            frontend_urls.append(env_frontend)
+        if env_frontend_alt:
+            frontend_urls.append(env_frontend_alt)
+        
+        print(f"🎯 [Django] CORS configurado para orígenes específicos: {frontend_urls}")
+        return False, frontend_urls
+
+CORS_ALLOW_ALL_ORIGINS, CORS_ALLOWED_ORIGINS = configure_cors()
+CORS_ALLOW_CREDENTIALS = True  # Habilitar cookies/sesión
+
+# ========== VARIABLES DE FRONTEND PARA COMPATIBILIDAD ==========
+# Estas variables se mantienen para compatibilidad con configuraciones existentes
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 FRONTEND_URL_ALT = os.getenv("FRONTEND_URL_ALT", "http://127.0.0.1:5173")
 
-# CORS_ALLOW_ALL_ORIGINS = True  # SOLO DEV. En prod: usa CORS_ALLOWED_ORIGINS.
-# Configuración de CORS
-CORS_ALLOWED_ORIGINS = [
-    FRONTEND_URL,
-    FRONTEND_URL_ALT,
-    # IP del emulador Android para desarrollo móvil
-    "http://10.0.2.2:8000",
-    "http://10.0.2.2:5173",
-]
-CORS_ALLOW_CREDENTIALS = True  # Por si usas sesión/cookies
+print(f"🎨 [Django] Frontend URLs configuradas: {FRONTEND_URL}, {FRONTEND_URL_ALT}")
 # Application definition
 
 INSTALLED_APPS = [

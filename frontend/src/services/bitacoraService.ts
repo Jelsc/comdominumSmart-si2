@@ -1,7 +1,5 @@
-import axios from "axios";
+import { api } from "@/lib/api";
 import type { BitacoraLog } from "@/types/bitacora";
-
-const API_URL = "http://localhost:8000/api/bitacora/";
 
 export interface PaginatedBitacora {
   count: number;
@@ -16,7 +14,7 @@ export const getBitacora = async (
   search = "",
   rol = ""
 ): Promise<PaginatedBitacora> => {
-  const response = await axios.get(API_URL, {
+  const response = await api.get("/api/bitacora/", {
     params: { page, search, rol }, // ahora mandamos rol al backend
   });
   return response.data;
