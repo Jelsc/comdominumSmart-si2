@@ -183,11 +183,9 @@ export default function ResidentesPage() {
         search={search}
         estadoFilter={estadoFilter}
         tipoFilter={tipoFilter}
-        unidadFilter={unidadFilter}
         onSearchChange={setSearch}
         onEstadoFilterChange={setEstadoFilter}
         onTipoFilterChange={setTipoFilter}
-        onUnidadFilterChange={setUnidadFilter}
         loading={loading}
       />
 

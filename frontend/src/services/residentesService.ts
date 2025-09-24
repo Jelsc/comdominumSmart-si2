@@ -105,8 +105,9 @@ export const residentesApi = {
 
   // Actualizar residente
   async update(id: number, data: ResidenteFormData): Promise<ApiResponse<Residente>> {
+    // Usar PATCH para actualizaciones parciales (más tolerante)
     const response = await apiRequest(`/api/residentes/${id}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(toDTO(data)),
     });
     

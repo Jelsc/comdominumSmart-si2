@@ -33,6 +33,7 @@ import {
 import { DatePicker } from '@/components/date-picker';
 import { Loader2 } from 'lucide-react';
 import type { Residente, ResidenteFormData } from '@/types';
+import { toast } from 'sonner';
 
 // Esquema de validación para residentes
 const residenteSchema = z.object({
@@ -116,8 +117,8 @@ export function ResidenteStore({
   }, [isOpen, initialData, form]);
 
   const handleSubmit = async (data: ResidenteFormData) => {
-    // Validación adicional: la fecha de ingreso es requerida por el backend
-    if (!data.fecha_ingreso) {
+    // Requerir fecha_ingreso solo en creación; en edición (PATCH) puede omitirse
+    if (!isEdit && !data.fecha_ingreso) {
       form.setError('fecha_ingreso', { type: 'required', message: 'La fecha de ingreso es requerida' });
       return;
     }
@@ -125,6 +126,9 @@ export function ResidenteStore({
     if (success) {
       form.reset();
       onClose();
+    } else {
+      // Feedback si no se pudo guardar
+      toast.error('No se pudo guardar los cambios. Revisa los campos y vuelve a intentar.');
     }
   };
 
@@ -134,7 +138,7 @@ export function ResidenteStore({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -142,7 +146,14 @@ export function ResidenteStore({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(async (values) => {
+              console.log('[ResidenteStore] Submit iniciado', { isEdit, values });
+              await handleSubmit(values);
+              console.log('[ResidenteStore] Submit finalizado');
+            })}
+            className="space-y-6"
+          >
             {/* Información Personal */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Información Personal</h3>
@@ -322,7 +333,7 @@ export function ResidenteStore({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || form.formState.isSubmitting}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEdit ? 'Actualizar' : 'Crear'}
               </Button>

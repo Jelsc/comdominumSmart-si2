@@ -6,7 +6,7 @@ En DEV usamos Docker para **db + backend + frontend**. Flutter se corre fuera de
 ## 📁 Estructura
 
 ```
-transporte-si2/
+ComdominumSmart-si2/
 ├─ backend/         # Django + DRF
 ├─ frontend/        # React + Vite + TS + Tailwind
 ├─ mobile/          # Flutter (fuera de Docker en dev)
@@ -33,12 +33,12 @@ transporte-si2/
 git clone <URL-DEL-REPO>
 
 # Linux/Mac
-cp .env.example .env
 cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
 
 # Windows PowerShell
-copy .env.example .env
 copy frontend\.env.example frontend\.env
+copy backend/.env.example backend/.env
 ```
 
 ### 2) Levantar servicios
