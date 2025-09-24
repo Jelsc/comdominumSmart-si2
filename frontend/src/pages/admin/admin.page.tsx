@@ -35,11 +35,10 @@ const sidebarModules: SidebarModule[] = [
     id: "Administracion interna",
     name: "Administracion interna",
     icon: UserCog,
-    route: "/admin/conductores",
+    route: "/admin/residentes ",
     options: [
-      { id: "listado", label: "Listado", route: "/admin/conductores", icon: Users },
-      { id: "nuevo", label: "Nuevo", route: "/admin/conductores/nuevo", icon: Truck },
-      { id: "estadisticas", label: "Estadísticas", route: "/admin/conductores/estadisticas", icon: BarChart3 },
+      { id: "residentes", label: "Residentes", route: "/admin/residentes", icon: Users },
+      { id: "personal", label: "Personal", route: "/admin/personal", icon: Users },
     ],
   },
   {

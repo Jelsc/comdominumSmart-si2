@@ -113,6 +113,15 @@ export async function apiRequest<T>(
         errorData = { message: "Error en la petición" };
       }
       
+      // Si es un error 403 (Forbidden), devolver un error estructurado para mejor manejo
+      if (response.status === 403) {
+        return {
+          success: false,
+          error: "No tiene permisos para acceder a este recurso",
+          data: null
+        };
+      }
+      
       throw new ApiError(
         errorData.error || errorData.message || "Error en la petición",
         response.status,
@@ -811,7 +820,7 @@ export const usersService = {
   },
 
   // Obtener conductores disponibles para autocompletado
-  async getConductoresDisponibles(): Promise<ApiResponse<Array<{
+  async getResidentesDisponibles(): Promise<ApiResponse<Array<{
     id: number;
     personal__nombre: string;
     personal__apellido: string;

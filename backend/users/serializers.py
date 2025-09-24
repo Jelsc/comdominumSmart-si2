@@ -13,13 +13,13 @@ class RolSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     rol = RolSerializer(read_only=True)
-    rol_id = serializers.IntegerField(write_only=True, required=False)
+    rol_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     password = serializers.CharField(write_only=True, required=False)
     password_confirm = serializers.CharField(write_only=True, required=False)
     
     # Campos de autocompletado
     personal_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    conductor_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    residente_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     # Campos calculados
     puede_acceder_admin = serializers.BooleanField(read_only=True)
@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "password_confirm",
             "personal_id",
-            "conductor_id",
+            "residente_id",
             "puede_acceder_admin",
             "fecha_creacion",
             "fecha_ultimo_acceso",
@@ -53,14 +53,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """Validaciones generales"""
+        # Validar que el rol_id exista si se proporciona
+        if 'rol_id' in attrs and attrs['rol_id'] is not None:
+            try:
+                Rol.objects.get(id=attrs['rol_id'])
+            except Rol.DoesNotExist:
+                raise serializers.ValidationError({"rol_id": "El rol especificado no existe"})
+        
         # Validar contraseñas si se proporcionan
         if 'password' in attrs and 'password_confirm' in attrs:
             if attrs['password'] != attrs['password_confirm']:
                 raise serializers.ValidationError("Las contraseñas no coinciden")
         
-        # Validar CI único si se proporciona
+        # Validar CI único si se proporciona, pero solo en creación o si cambia
         if 'ci' in attrs and attrs['ci']:
-            if CustomUser.objects.filter(ci=attrs['ci']).exists():
+            # Si es actualización y la CI no ha cambiado, no validar
+            if self.instance and self.instance.ci == attrs['ci']:
+                pass
+            # En cualquier otro caso, validar unicidad
+            elif CustomUser.objects.filter(ci=attrs['ci']).exists():
                 raise serializers.ValidationError({"ci": "Ya existe un usuario con esta cédula de identidad"})
         
         return attrs
@@ -71,7 +82,7 @@ class UserSerializer(serializers.ModelSerializer):
         password_confirm = validated_data.pop('password_confirm', None)
         rol_id = validated_data.pop('rol_id', None)
         personal_id = validated_data.pop('personal_id', None)
-        conductor_id = validated_data.pop('conductor_id', None)
+        residente_id = validated_data.pop('residente_id', None)
         
         user = CustomUser.objects.create_user(**validated_data)
         
@@ -106,27 +117,27 @@ class UserSerializer(serializers.ModelSerializer):
                     user.fecha_nacimiento = personal.fecha_nacimiento
             except Personal.DoesNotExist:
                 pass
-        
-        # Autocompletar desde conductor si se selecciona
-        if conductor_id:
+                
+        # Autocompletar desde residente si se selecciona
+        if residente_id:
             try:
-                from conductores.models import Conductor
-                conductor = Conductor.objects.get(id=conductor_id)
-                user.conductor = conductor
-                # Autocompletar datos directos del conductor
+                from residentes.models import Residente
+                residente = Residente.objects.get(id=residente_id)
+                user.residente = residente
+                # Autocompletar datos directos del residente
                 if not user.first_name:
-                    user.first_name = conductor.nombre
+                    user.first_name = residente.nombre
                 if not user.last_name:
-                    user.last_name = conductor.apellido
+                    user.last_name = residente.apellido
                 if not user.telefono:
-                    user.telefono = conductor.telefono
+                    user.telefono = residente.telefono
                 if not user.email:
-                    user.email = conductor.email
+                    user.email = residente.email
                 if not user.ci:
-                    user.ci = conductor.ci
+                    user.ci = residente.ci
                 if not user.fecha_nacimiento:
-                    user.fecha_nacimiento = conductor.fecha_nacimiento
-            except Conductor.DoesNotExist:
+                    user.fecha_nacimiento = residente.fecha_nacimiento
+            except Residente.DoesNotExist:
                 pass
         
         user.save()
@@ -138,7 +149,7 @@ class UserSerializer(serializers.ModelSerializer):
         password_confirm = validated_data.pop('password_confirm', None)
         rol_id = validated_data.pop('rol_id', None)
         personal_id = validated_data.pop('personal_id', None)
-        conductor_id = validated_data.pop('conductor_id', None)
+        residente_id = validated_data.pop('residente_id', None)
         
         # Actualizar campos básicos
         for attr, value in validated_data.items():
@@ -148,13 +159,16 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             instance.set_password(password)
         
-        # Actualizar rol si se proporciona
-        if rol_id:
+        # Actualizar rol si se proporciona (o establecerlo a None si rol_id es None)
+        if rol_id is not None:
             try:
                 rol = Rol.objects.get(id=rol_id)
                 instance.rol = rol
             except Rol.DoesNotExist:
                 pass
+        elif 'rol_id' in validated_data:
+            # Si explícitamente se envía rol_id=null, desasociar el rol
+            instance.rol = None
         
         # Actualizar relaciones
         if personal_id is not None:
@@ -167,17 +181,19 @@ class UserSerializer(serializers.ModelSerializer):
                     pass
             else:
                 instance.personal = None
-        
-        if conductor_id is not None:
-            if conductor_id:
+                
+        # Actualizar relación con residente
+        if residente_id is not None:
+            if residente_id:
                 try:
-                    from conductores.models import Conductor
-                    conductor = Conductor.objects.get(id=conductor_id)
-                    instance.conductor = conductor
-                except Conductor.DoesNotExist:
+                    from residentes.models import Residente
+                    residente = Residente.objects.get(id=residente_id)
+                    instance.residente = residente
+                except Residente.DoesNotExist:
                     pass
             else:
-                instance.conductor = None
+                # Si se envía explícitamente residente_id=null, desasociar el residente
+                instance.residente = None
         
         instance.save()
         return instance

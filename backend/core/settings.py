@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "core",
     "users",
-    "conductores",
+    "residentes",
     "personal",
     # Requisito para allauth
     "django.contrib.sites",

@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertTriangle, User, Shield, Car } from 'lucide-react';
+import { Loader2, AlertTriangle, User, Shield, Home } from 'lucide-react';
 import type { Usuario } from '@/types';
 
 interface UsuarioDeleteProps {
@@ -52,8 +52,10 @@ export function UsuarioDelete({
         return <Shield className="h-4 w-4 text-red-500" />;
       case 'Supervisor':
         return <User className="h-4 w-4 text-blue-500" />;
-      case 'Conductor':
-        return <Car className="h-4 w-4 text-orange-500" />;
+      case 'Residente':
+        return <Home className="h-4 w-4 text-green-500" />;
+      case 'Operador':
+        return <User className="h-4 w-4 text-purple-500" />;
       default:
         return <User className="h-4 w-4 text-gray-500" />;
     }
@@ -64,7 +66,7 @@ export function UsuarioDelete({
       'Administrador': 'destructive',
       'Supervisor': 'default',
       'Operador': 'secondary',
-      'Conductor': 'outline',
+      'Residente': 'outline',
       'Cliente': 'outline',
     };
 
@@ -132,7 +134,7 @@ export function UsuarioDelete({
                 </div>
 
                 {/* Vinculaciones */}
-                {(usuario.personal || usuario.conductor) && (
+                {(usuario.personal || usuario.residente) && (
                   <div className="mt-3 pt-3 border-t">
                     <span className="font-medium">Vinculaciones:</span>
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -142,10 +144,10 @@ export function UsuarioDelete({
                           Personal #{usuario.personal}
                         </Badge>
                       )}
-                      {usuario.conductor && (
+                      {usuario.residente && (
                         <Badge variant="outline" className="flex items-center gap-1">
-                          <Car className="h-3 w-3" />
-                          Conductor #{usuario.conductor}
+                          <Home className="h-3 w-3" />
+                          Residente #{usuario.residente}
                         </Badge>
                       )}
                     </div>

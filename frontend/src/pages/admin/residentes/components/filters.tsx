@@ -10,30 +10,27 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Filter, X, Users, Shield, User } from 'lucide-react';
-import type { UsuarioFilters, Role } from '@/types';
+import { Search, Filter, X, User } from 'lucide-react';
 
-interface UsuarioFiltersProps {
+interface ResidenteFiltersProps {
   search: string;
-  rolFilter: string;
-  activeFilter: string;
+  estadoFilter: string;
+  tipoFilter: string;
   onSearchChange: (value: string) => void;
-  onRolFilterChange: (value: string) => void;
-  onActiveFilterChange: (value: string) => void;
-  roles: Role[];
+  onEstadoFilterChange: (value: string) => void;
+  onTipoFilterChange: (value: string) => void;
   loading?: boolean;
 }
 
-export function UsuarioFiltersComponent({ 
+export function ResidenteFiltersComponent({ 
   search,
-  rolFilter,
-  activeFilter,
+  estadoFilter,
+  tipoFilter,
   onSearchChange,
-  onRolFilterChange,
-  onActiveFilterChange,
-  roles,
+  onEstadoFilterChange,
+  onTipoFilterChange,
   loading = false 
-}: UsuarioFiltersProps) {
+}: ResidenteFiltersProps) {
 
   return (
     <Card>
@@ -49,7 +46,7 @@ export function UsuarioFiltersComponent({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               type="text"
-              placeholder="Buscar por username, nombre, email..."
+              placeholder="Buscar por nombre, email, CI..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               disabled={loading}
@@ -57,29 +54,27 @@ export function UsuarioFiltersComponent({
             />
           </div>
 
-          <Select value={rolFilter} onValueChange={onRolFilterChange} disabled={loading}>
+          <Select value={estadoFilter} onValueChange={onEstadoFilterChange} disabled={loading}>
             <SelectTrigger>
-              <SelectValue placeholder="Todos los roles" />
+              <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los roles</SelectItem>
-              {roles.map((rol) => (
-                <SelectItem key={rol.id} value={rol.nombre}>
-                  {rol.nombre}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="activo">Activo</SelectItem>
+              <SelectItem value="inactivo">Inactivo</SelectItem>
+              <SelectItem value="suspendido">Suspendido</SelectItem>
+              <SelectItem value="en_proceso">En Proceso</SelectItem>
             </SelectContent>
           </Select>
 
-
-          <Select value={activeFilter} onValueChange={onActiveFilterChange} disabled={loading}>
+          <Select value={tipoFilter} onValueChange={onTipoFilterChange} disabled={loading}>
             <SelectTrigger>
-              <SelectValue placeholder="Todos" />
+              <SelectValue placeholder="Tipo de residente" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="true">Activos</SelectItem>
-              <SelectItem value="false">Inactivos</SelectItem>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              <SelectItem value="propietario">Propietario</SelectItem>
+              <SelectItem value="inquilino">Inquilino</SelectItem>
             </SelectContent>
           </Select>
         </div>

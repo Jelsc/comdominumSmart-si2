@@ -1,51 +1,49 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { conductoresApi } from '@/services/conductoresService';
+import { residentesApi } from '@/services/residentesService';
 import type { 
-  Conductor, 
-  ConductorFormData, 
-  ConductorFilters, 
+  Residente, 
+  ResidenteFormData, 
+  ResidenteFilters, 
   PaginatedResponse,
-  ConductorOption 
+  ResidenteOption 
 } from '@/types';
 
-interface UseConductoresState {
-  data: PaginatedResponse<Conductor> | null;
+interface UseResidentesState {
+  data: PaginatedResponse<Residente> | null;
   loading: boolean;
   error: string | null;
-  selectedItem: Conductor | null;
+  selectedItem: Residente | null;
   isStoreModalOpen: boolean;
   isDeleteModalOpen: boolean;
-  filters: ConductorFilters;
-  availableConductores: ConductorOption[];
-  licenciasVencidas: Conductor[];
-  licenciasPorVencer: Conductor[];
+  filters: ResidenteFilters;
+  availableResidentes: ResidenteOption[];
+  residentesActivos: number;
+  residentesInactivos: number;
 }
 
-interface UseConductoresActions {
+interface UseResidentesActions {
   // Data operations
-  loadData: (filters?: ConductorFilters) => Promise<void>;
+  loadData: (filters?: ResidenteFilters) => Promise<void>;
   loadItem: (id: number) => Promise<void>;
-  createItem: (data: ConductorFormData) => Promise<boolean>;
-  updateItem: (id: number, data: ConductorFormData) => Promise<boolean>;
+  createItem: (data: ResidenteFormData) => Promise<boolean>;
+  updateItem: (id: number, data: ResidenteFormData) => Promise<boolean>;
   deleteItem: (id: number) => Promise<boolean>;
   
   // UI state management
-  openStoreModal: (item?: Conductor) => void;
+  openStoreModal: (item?: Residente) => void;
   closeStoreModal: () => void;
-  openDeleteModal: (item: Conductor) => void;
+  openDeleteModal: (item: Residente) => void;
   closeDeleteModal: () => void;
-  setFilters: (filters: ConductorFilters) => void;
+  setFilters: (filters: ResidenteFilters) => void;
   clearError: () => void;
   
   // Utility functions
-  loadAvailableConductores: () => Promise<void>;
-  loadLicenciasVencidas: () => Promise<void>;
-  loadLicenciasPorVencer: () => Promise<void>;
+  loadAvailableResidentes: () => Promise<void>;
 }
 
-export function useConductores(): UseConductoresState & UseConductoresActions {
-  const [state, setState] = useState<UseConductoresState>({
+export function useResidentes(): UseResidentesState & UseResidentesActions {
+  const [state, setState] = useState<UseResidentesState>({
     data: null,
     loading: false,
     error: null,
@@ -53,26 +51,31 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     isStoreModalOpen: false,
     isDeleteModalOpen: false,
     filters: {},
-    availableConductores: [],
-    licenciasVencidas: [],
-    licenciasPorVencer: [],
+    availableResidentes: [],
+    residentesActivos: 0,
+    residentesInactivos: 0,
   });
 
-  const loadData = useCallback(async (filters?: ConductorFilters) => {
+  const loadData = useCallback(async (filters?: ResidenteFilters) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await conductoresApi.list(filters);
+      const response = await residentesApi.list(filters);
       
       if (response.success && response.data) {
+        const residentesActivos = response.data.results?.filter(r => r.estado === 'activo').length || 0;
+        const residentesInactivos = (response.data.results?.length || 0) - residentesActivos;
+        
         setState(prev => ({ 
           ...prev, 
           data: response.data!, 
           loading: false,
-          filters: filters || prev.filters 
+          filters: filters || prev.filters,
+          residentesActivos,
+          residentesInactivos,
         }));
       } else {
-        throw new Error(response.error || 'Error al cargar los conductores');
+        throw new Error(response.error || 'Error al cargar los residentes');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -89,7 +92,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await conductoresApi.get(id);
+      const response = await residentesApi.get(id);
       
       if (response.success && response.data) {
         setState(prev => ({ 
@@ -98,7 +101,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
           loading: false 
         }));
       } else {
-        throw new Error(response.error || 'Error al cargar el conductor');
+        throw new Error(response.error || 'Error al cargar el residente');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -111,11 +114,11 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     }
   }, []);
 
-  const createItem = useCallback(async (data: ConductorFormData): Promise<boolean> => {
+  const createItem = useCallback(async (data: ResidenteFormData): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await conductoresApi.create(data);
+      const response = await residentesApi.create(data);
       
       if (response.success) {
         setState(prev => ({ 
@@ -124,11 +127,11 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
           isStoreModalOpen: false,
           selectedItem: null 
         }));
-        toast.success('Conductor creado exitosamente');
+        toast.success('Residente creado exitosamente');
         await loadData(state.filters); // Recargar datos
         return true;
       } else {
-        throw new Error(response.error || 'Error al crear el conductor');
+        throw new Error(response.error || 'Error al crear el residente');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -142,11 +145,11 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     }
   }, [loadData, state.filters]);
 
-  const updateItem = useCallback(async (id: number, data: ConductorFormData): Promise<boolean> => {
+  const updateItem = useCallback(async (id: number, data: ResidenteFormData): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await conductoresApi.update(id, data);
+      const response = await residentesApi.update(id, data);
       
       if (response.success) {
         setState(prev => ({ 
@@ -155,11 +158,11 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
           isStoreModalOpen: false,
           selectedItem: null 
         }));
-        toast.success('Conductor actualizado exitosamente');
+        toast.success('Residente actualizado exitosamente');
         await loadData(state.filters); // Recargar datos
         return true;
       } else {
-        throw new Error(response.error || 'Error al actualizar el conductor');
+        throw new Error(response.error || 'Error al actualizar el residente');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -177,7 +180,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await conductoresApi.remove(id);
+      const response = await residentesApi.remove(id);
       
       if (response.success) {
         setState(prev => ({ 
@@ -186,11 +189,11 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
           isDeleteModalOpen: false,
           selectedItem: null 
         }));
-        toast.success('Conductor eliminado exitosamente');
+        toast.success('Residente eliminado exitosamente');
         await loadData(state.filters); // Recargar datos
         return true;
       } else {
-        throw new Error(response.error || 'Error al eliminar el conductor');
+        throw new Error(response.error || 'Error al eliminar el residente');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -204,7 +207,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     }
   }, [loadData, state.filters]);
 
-  const openStoreModal = useCallback((item?: Conductor) => {
+  const openStoreModal = useCallback((item?: Residente) => {
     setState(prev => ({ 
       ...prev, 
       isStoreModalOpen: true, 
@@ -220,7 +223,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     }));
   }, []);
 
-  const openDeleteModal = useCallback((item: Conductor) => {
+  const openDeleteModal = useCallback((item: Residente) => {
     setState(prev => ({ 
       ...prev, 
       isDeleteModalOpen: true, 
@@ -236,7 +239,7 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     }));
   }, []);
 
-  const setFilters = useCallback((filters: ConductorFilters) => {
+  const setFilters = useCallback((filters: ResidenteFilters) => {
     setState(prev => ({ ...prev, filters }));
   }, []);
 
@@ -244,48 +247,18 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  const loadAvailableConductores = useCallback(async () => {
+  const loadAvailableResidentes = useCallback(async () => {
     try {
-      const response = await conductoresApi.getAvailable();
+      const response = await residentesApi.getAvailable();
       
       if (response.success && response.data) {
         setState(prev => ({ 
           ...prev, 
-          availableConductores: response.data! 
+          availableResidentes: response.data! 
         }));
       }
     } catch (error) {
-      console.error('Error al cargar conductores disponibles:', error);
-    }
-  }, []);
-
-  const loadLicenciasVencidas = useCallback(async () => {
-    try {
-      const response = await conductoresApi.getLicenciasVencidas();
-      
-      if (response.success && response.data) {
-        setState(prev => ({ 
-          ...prev, 
-          licenciasVencidas: response.data! 
-        }));
-      }
-    } catch (error) {
-      console.error('Error al cargar licencias vencidas:', error);
-    }
-  }, []);
-
-  const loadLicenciasPorVencer = useCallback(async () => {
-    try {
-      const response = await conductoresApi.getLicenciasPorVencer();
-      
-      if (response.success && response.data) {
-        setState(prev => ({ 
-          ...prev, 
-          licenciasPorVencer: response.data! 
-        }));
-      }
-    } catch (error) {
-      console.error('Error al cargar licencias por vencer:', error);
+      console.error('Error al cargar residentes disponibles:', error);
     }
   }, []);
 
@@ -302,8 +275,6 @@ export function useConductores(): UseConductoresState & UseConductoresActions {
     closeDeleteModal,
     setFilters,
     clearError,
-    loadAvailableConductores,
-    loadLicenciasVencidas,
-    loadLicenciasPorVencer,
+    loadAvailableResidentes,
   };
 }

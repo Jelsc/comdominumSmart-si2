@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Car, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useConductores } from '@/hooks/useConductores';
-import { ConductorTable } from './components/table';
-import { ConductorFiltersComponent } from './components/filters';
-import { ConductorStore } from './components/store';
-import { ConductorDelete } from './components/delete';
+import { Plus, Home, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useResidentes } from '@/hooks/useResidentes';
+import { ResidenteTable } from './components/table';
+import { ResidenteFiltersComponent } from './components/filters';
+import { ResidenteStore } from './components/store';
+import { ResidenteDelete } from './components/delete';
 import AdminLayout from '@/app/layout/admin-layout';
 
 const ITEMS_PER_PAGE = 10;
 
-export default function ConductoresPage() {
+export default function ResidentesPage() {
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
   const [searchDebounced, setSearchDebounced] = useState<string>("");
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
-  const [tipoLicenciaFilter, setTipoLicenciaFilter] = useState<string>("all");
-  const [licenciaVencidaFilter, setLicenciaVencidaFilter] = useState<string>("all");
+  const [tipoFilter, setTipoFilter] = useState<string>("all");
+  const [unidadFilter, setUnidadFilter] = useState<string>("all");
 
   const {
     data,
@@ -26,8 +26,8 @@ export default function ConductoresPage() {
     selectedItem,
     isStoreModalOpen,
     isDeleteModalOpen,
-    licenciasVencidas,
-    licenciasPorVencer,
+    residentesActivos,
+    residentesInactivos,
     loadData,
     createItem,
     updateItem,
@@ -37,17 +37,15 @@ export default function ConductoresPage() {
     openDeleteModal,
     closeDeleteModal,
     clearError,
-    loadLicenciasVencidas,
-    loadLicenciasPorVencer,
-  } = useConductores();
+  } = useResidentes();
 
   // Función para cargar datos con filtros y paginación
-  const fetchConductores = async (pageNumber = 1, searchQuery = "", estado = "all", tipoLicencia = "all", licenciaVencida = "all") => {
+  const fetchResidentes = async (pageNumber = 1, searchQuery = "", estado = "all", tipo = "all", unidad = "all") => {
     const filters: any = {
       ...(searchQuery && { search: searchQuery }),
       ...(estado !== "all" && { estado }),
-      ...(tipoLicencia !== "all" && { tipo_licencia: tipoLicencia }),
-      ...(licenciaVencida !== "all" && { licencia_vencida: licenciaVencida === "true" }),
+      ...(tipo !== "all" && { tipo }),
+      ...(unidad && { unidad_habitacional: unidad }),
     };
     
     await loadData(filters);
@@ -64,21 +62,19 @@ export default function ConductoresPage() {
 
   // Cargar datos al montar el componente y cuando cambien los filtros
   useEffect(() => {
-    fetchConductores(page, searchDebounced, estadoFilter, tipoLicenciaFilter, licenciaVencidaFilter);
-    loadLicenciasVencidas();
-    loadLicenciasPorVencer();
-  }, [page, searchDebounced, estadoFilter, tipoLicenciaFilter, licenciaVencidaFilter]);
+    fetchResidentes(page, searchDebounced, estadoFilter, tipoFilter, unidadFilter);
+  }, [page, searchDebounced, estadoFilter, tipoFilter, unidadFilter]);
 
   const handleCreate = () => {
     openStoreModal();
   };
 
-  const handleEdit = (conductor: any) => {
-    openStoreModal(conductor);
+  const handleEdit = (residente: any) => {
+    openStoreModal(residente);
   };
 
-  const handleDelete = (conductor: any) => {
-    openDeleteModal(conductor);
+  const handleDelete = (residente: any) => {
+    openDeleteModal(residente);
   };
 
   const handleStoreSubmit = async (data: any) => {
@@ -98,9 +94,9 @@ export default function ConductoresPage() {
 
   const totalPages = Math.ceil((data?.count || 0) / ITEMS_PER_PAGE);
 
-  const totalConductores = data?.count || 0;
-  const conductoresActivos = data?.results?.filter(c => c.estado === 'disponible').length || 0;
-  const conductoresInactivos = totalConductores - conductoresActivos;
+  const totalResidentes = data?.count || 0;
+  const residentesActivosCount = data?.results?.filter(r => r.estado === 'activo').length || 0;
+  const residentesInactivosCount = totalResidentes - residentesActivosCount;
 
   return (
     <AdminLayout>
@@ -108,14 +104,14 @@ export default function ConductoresPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestión de Conductores</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Gestión de Residentes</h1>
             <p className="text-muted-foreground">
-              Administra la información de los conductores y sus licencias
+              Administra la información de los residentes del condominio
             </p>
           </div>
           <Button onClick={handleCreate} className="flex items-center gap-2 w-full sm:w-auto">
             <Plus className="h-4 w-4" />
-            Agregar Conductor
+            Agregar Residente
           </Button>
         </div>
 
@@ -123,27 +119,27 @@ export default function ConductoresPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Conductores</CardTitle>
-            <Car className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Residentes</CardTitle>
+            <Home className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalConductores}
+              {totalResidentes}
             </div>
             <p className="text-xs text-muted-foreground">
-              Conductores registrados
+              Residentes registrados
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conductores Activos</CardTitle>
+            <CardTitle className="text-sm font-medium">Residentes Activos</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {conductoresActivos}
+              {residentesActivosCount}
             </div>
             <p className="text-xs text-muted-foreground">
               En el sistema
@@ -153,82 +149,52 @@ export default function ConductoresPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Licencias Vencidas</CardTitle>
+            <CardTitle className="text-sm font-medium">Residentes Inactivos</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {licenciasVencidas.length}
+              {residentesInactivosCount}
             </div>
             <p className="text-xs text-muted-foreground">
-              Requieren renovación
+              Fuera del sistema
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <CardTitle className="text-sm font-medium">Propietarios</CardTitle>
+            <Home className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {licenciasPorVencer.length}
+            <div className="text-2xl font-bold text-blue-600">
+              {data?.results?.filter(r => r.tipo === 'propietario').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Próximas a vencer
+              Propietarios registrados
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Alertas de Licencias */}
-      {(licenciasVencidas.length > 0 || licenciasPorVencer.length > 0) && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-800">
-              <AlertTriangle className="h-5 w-5" />
-              Alertas de Licencias
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {licenciasVencidas.length > 0 && (
-              <div className="flex items-center gap-2 text-red-700">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="font-medium">
-                  {licenciasVencidas.length} licencia(s) vencida(s) requieren renovación inmediata
-                </span>
-              </div>
-            )}
-            {licenciasPorVencer.length > 0 && (
-              <div className="flex items-center gap-2 text-yellow-700">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="font-medium">
-                  {licenciasPorVencer.length} licencia(s) próxima(s) a vencer en los próximos 30 días
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Filtros */}
-      <ConductorFiltersComponent
+      <ResidenteFiltersComponent
         search={search}
         estadoFilter={estadoFilter}
-        tipoLicenciaFilter={tipoLicenciaFilter}
-        licenciaVencidaFilter={licenciaVencidaFilter}
+        tipoFilter={tipoFilter}
+        unidadFilter={unidadFilter}
         onSearchChange={setSearch}
         onEstadoFilterChange={setEstadoFilter}
-        onTipoLicenciaFilterChange={setTipoLicenciaFilter}
-        onLicenciaVencidaFilterChange={setLicenciaVencidaFilter}
+        onTipoFilterChange={setTipoFilter}
+        onUnidadFilterChange={setUnidadFilter}
         loading={loading}
       />
 
       {/* Tabla */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Conductores</CardTitle>
+          <CardTitle>Lista de Residentes</CardTitle>
         </CardHeader>
         <CardContent>
           {error && (
@@ -245,7 +211,7 @@ export default function ConductoresPage() {
             </div>
           )}
           
-          <ConductorTable
+          <ResidenteTable
             data={data?.results || []}
             loading={loading}
             onEdit={handleEdit}
@@ -254,14 +220,14 @@ export default function ConductoresPage() {
             totalPages={totalPages}
             onPageChange={(newPage) => {
               setPage(newPage);
-              fetchConductores(newPage, searchDebounced, estadoFilter, tipoLicenciaFilter, licenciaVencidaFilter);
+              fetchResidentes(newPage, searchDebounced, estadoFilter, tipoFilter, unidadFilter);
             }}
           />
         </CardContent>
       </Card>
 
       {/* Modales */}
-      <ConductorStore
+      <ResidenteStore
         isOpen={isStoreModalOpen}
         onClose={closeStoreModal}
         onSubmit={handleStoreSubmit}
@@ -269,11 +235,11 @@ export default function ConductoresPage() {
         loading={loading}
       />
 
-      <ConductorDelete
+      <ResidenteDelete
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={handleDeleteConfirm}
-        conductor={selectedItem}
+        residente={selectedItem}
         loading={loading}
       />
       </div>

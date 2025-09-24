@@ -62,9 +62,9 @@ class CustomUser(AbstractUser):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_ultimo_acceso = models.DateTimeField(null=True, blank=True)
     
-    # Relaciones opcionales con personal y conductores
+    # Relaciones opcionales con personal y residentes
     personal = models.OneToOneField('personal.Personal', on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_personal')
-    conductor = models.OneToOneField('conductores.Conductor', on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_conductor')
+    residente = models.OneToOneField('residentes.Residente', on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_residente')
 
     def __str__(self):
         return f"{self.username} ({self.rol.nombre if self.rol else 'Sin rol'})"
