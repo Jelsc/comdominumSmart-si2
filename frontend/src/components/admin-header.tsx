@@ -6,7 +6,7 @@ import Breadcrumb from '@/components/breadcrumb';
 export default function Header() {
   return (
     <header className="h-[64px] bg-white border-b flex items-center justify-between px-[32px]">
-        <div className="flex items-center">
+        <div className="hidden md:flex items-center">
           <Breadcrumb />
         </div>
         <div className="flex items-center space-x-4">
