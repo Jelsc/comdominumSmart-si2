@@ -33,7 +33,7 @@ export type Residente = {
   unidad_habitacional: string; // Código de la unidad habitacional
   tipo: 'propietario' | 'inquilino';
   fecha_ingreso: string;
-  estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
+  estado: "activo" | "inactivo" | "suspendido" | "en_proceso";
   fecha_creacion: string;
   fecha_actualizacion: string;
   usuario?: number; // FK a CustomUser (nullable)
@@ -42,7 +42,7 @@ export type Residente = {
   // Campos calculados/derivados
   nombre_completo: string;
   puede_acceder: boolean;
-  estado_usuario: 'activo' | 'inactivo' | 'sin_usuario';
+  estado_usuario: "activo" | "inactivo" | "sin_usuario";
 };
 
 export type Usuario = {
@@ -121,7 +121,7 @@ export type ResidenteFormData = {
   unidad_habitacional: string; // Volvemos al campo original: código de unidad
   tipo: 'propietario' | 'inquilino';
   fecha_ingreso: Date | null;
-  estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
+  estado: "activo" | "inactivo" | "suspendido" | "en_proceso";
   usuario?: number | undefined;
 };
 
@@ -202,3 +202,107 @@ export type ResidenteOption = {
 
 // Exportar tipos de unidades
 export type { Unidad, UnidadForm, UnidadFilterParams } from './unidades';
+
+// Tipos para Notificaciones
+export type Notificacion = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  tipo:
+    | "general"
+    | "mantenimiento"
+    | "reunion"
+    | "emergencia"
+    | "evento"
+    | "cobranza";
+  tipo_display: string;
+  estado: "borrador" | "programada" | "enviada" | "cancelada";
+  estado_display: {
+    estado: string;
+    color: string;
+  };
+  roles_destinatarios: number[];
+  roles_destinatarios_info: {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    total_usuarios: number;
+  }[];
+  es_individual: boolean;
+  fecha_programada: string | null;
+  fecha_expiracion: string | null;
+  prioridad: "baja" | "normal" | "alta" | "urgente";
+  prioridad_display: string;
+  requiere_confirmacion: boolean;
+  activa: boolean;
+  creado_por: number | null;
+  creado_por_info: {
+    id: number;
+    username: string;
+    email: string;
+    nombre_completo: string;
+  } | null;
+  fecha_creacion: string;
+  fecha_actualizacion: string;
+  total_destinatarios: number;
+};
+
+export type NotificacionFormData = {
+  nombre: string;
+  descripcion: string;
+  tipo:
+    | "general"
+    | "mantenimiento"
+    | "reunion"
+    | "emergencia"
+    | "evento"
+    | "cobranza";
+  estado: "borrador" | "programada" | "enviada" | "cancelada";
+  roles_destinatarios: number[];
+  es_individual: boolean;
+  usuarios_seleccionados?: number[];
+  fecha_programada: Date | null;
+  fecha_expiracion: Date | null;
+  prioridad: "baja" | "normal" | "alta" | "urgente";
+  requiere_confirmacion: boolean;
+  activa: boolean;
+};
+
+export type NotificacionFilters = {
+  search?: string;
+  tipo?: string;
+  estado?: string;
+  prioridad?: string;
+  es_individual?: boolean;
+  activa?: boolean;
+  rol_destinatario?: number;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+};
+
+export type RolOption = {
+  id: number;
+  name: string;
+  nombre: string;
+  descripcion: string;
+  total_usuarios: number;
+};
+
+export type NotificacionEstadisticas = {
+  total: number;
+  por_estado: {
+    borrador: number;
+    programada: number;
+    enviada: number;
+    cancelada: number;
+  };
+  por_tipo: Record<string, number>;
+  por_prioridad: {
+    baja: number;
+    normal: number;
+    alta: number;
+    urgente: number;
+  };
+  individuales: number;
+  activas: number;
+};

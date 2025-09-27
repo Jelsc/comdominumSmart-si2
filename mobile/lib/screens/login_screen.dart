@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../services/auth_service.dart';
-import 'register_screen.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -78,20 +76,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
 
                 // Logo y título
-                const Icon(Icons.directions_bus, size: 80, color: Colors.green),
+                const Icon(Icons.home, size: 80, color: Colors.blue),
                 const SizedBox(height: 16),
                 const Text(
-                  'MoviFleet',
+                  'Condominio Smart',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: Colors.blue,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Viajes y encomiendas en un solo lugar',
+                  'Gestión inteligente de tu hogar',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -105,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Accede a tus reservas y servicios',
+                  'Accede a los servicios de tu condominio',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
 
@@ -182,33 +180,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Iniciar sesión',
                             style: TextStyle(fontSize: 16),
                           ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Botón de registro
-                SizedBox(
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.green),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Crear cuenta',
-                      style: TextStyle(fontSize: 16, color: Colors.green),
-                    ),
                   ),
                 ),
               ],

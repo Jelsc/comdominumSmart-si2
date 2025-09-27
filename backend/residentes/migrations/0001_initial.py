@@ -34,7 +34,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Residente',
                 'verbose_name_plural': 'Residentes',
                 'ordering': ['-fecha_creacion'],
-                'indexes': [models.Index(fields=['unidad_habitacional'], name='residentes__unidad__c50d62_idx'), models.Index(fields=['fecha_ingreso'], name='residentes__fecha_i_257133_idx'), models.Index(fields=['tipo'], name='residentes__tipo_48fa6e_idx')],
             },
         ),
     ]

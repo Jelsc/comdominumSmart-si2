@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import AdminPage from "../pages/admin/admin.page";
 import AdminLoginPage from "@/pages/auth/AdminLoginPage";
 import ProtectedRoute from "@/app/auth/ProtectedRoute";
@@ -8,6 +13,7 @@ import BitacoraPage from "@/pages/admin/bitacora.page";
 import PersonalPage from "../pages/admin/personal/personal.page";
 import ResidentesPage from "../pages/admin/residentes/residentes.page";
 import UsuariosPage from "../pages/admin/usuarios/users.page";
+import NotificacionesPage from "../pages/admin/notificaciones/notificaciones.page";
 import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 
@@ -15,7 +21,7 @@ export default function AppRouter() {
   return (
     <Router>
       <Routes>
-  <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
         {/* Rutas protegidas de administración */}
         <Route
           path="/admin/permisos"
@@ -42,11 +48,17 @@ export default function AppRouter() {
           }
         />
         {/* auth */}
-  {/* Ya no hay login/registro de cliente en web: redirigir a /admin */}
-  <Route path="/login" element={<Navigate to="/admin" replace />} />
-  <Route path="/register" element={<Navigate to="/admin" replace />} />
-  <Route path="/email-verification" element={<Navigate to="/admin" replace />} />
-  <Route path="/code-verification" element={<Navigate to="/admin" replace />} />
+        {/* Ya no hay login/registro de cliente en web: redirigir a /admin */}
+        <Route path="/login" element={<Navigate to="/admin" replace />} />
+        <Route path="/register" element={<Navigate to="/admin" replace />} />
+        <Route
+          path="/email-verification"
+          element={<Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/code-verification"
+          element={<Navigate to="/admin" replace />}
+        />
 
         {/* admin */}
         <Route path="/admin" element={<AdminLoginPage />} />
@@ -93,6 +105,14 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/admin/notificaciones"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <NotificacionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/mantenimiento"
           element={
             <ProtectedRoute requireAdmin={true}>
@@ -135,8 +155,8 @@ export default function AppRouter() {
           }
         />
 
-  {/* catch-all: redirigir al login de admin */}
-  <Route path="*" element={<Navigate to="/admin" replace />} />
+        {/* catch-all: redirigir al login de admin */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </Router>
   );
