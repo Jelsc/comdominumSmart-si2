@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import CondominiumIcon from "./app-logo";
-import { 
-  BarChart3, 
-  Users, 
+import {
+  BarChart3,
+  Users,
   UserCog,
   ChevronDown,
   ChevronUp,
   ShieldCheck,
   BookOpen,
+  Bell,
+} from "lucide-react";
 
-} from 'lucide-react';
-
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ModuleItem {
   id: string;
@@ -32,11 +32,11 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-        
+
   // Función para verificar si una ruta está activa
   const isRouteActive = (route?: string) => {
     if (!route) return false;
-    
+
     // Caso especial para dashboard
     if (route === "/admin/dashboard") {
       return currentPath === "/admin/dashboard" || currentPath === "/admin";
@@ -44,65 +44,119 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
     // Para otras rutas, verificar si la ruta actual comienza con la ruta del módulo
     return currentPath.startsWith(route);
   };
-  
+
   // Función para comprobar si un módulo o sus submódulos están activos
   const isModuleActive = (module: ModuleItem): boolean => {
     if (module.route && isRouteActive(module.route)) return true;
-    
+
     if (module.submodules) {
-      return module.submodules.some(submodule => 
-        (submodule.route && isRouteActive(submodule.route)) || 
-        (submodule.submodules && isModuleActive(submodule))
+      return module.submodules.some(
+        (submodule) =>
+          (submodule.route && isRouteActive(submodule.route)) ||
+          (submodule.submodules && isModuleActive(submodule))
       );
     }
-    
+
     return false;
   };
-  
+
   // Función para alternar la expansión de un módulo
   const toggleExpand = (moduleId: string) => {
-    setExpandedModules(prev => 
-      prev.includes(moduleId) 
-        ? prev.filter(id => id !== moduleId)
+    setExpandedModules((prev) =>
+      prev.includes(moduleId)
+        ? prev.filter((id) => id !== moduleId)
         : [...prev, moduleId]
     );
   };
-  
+
   // Función para verificar si un módulo está expandido
   const isExpanded = (moduleId: string) => expandedModules.includes(moduleId);
-  
+
   const sidebarModules: ModuleItem[] = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, route: '/admin/dashboard' },
-    { 
-      id: 'usuarios-sistema', 
-      name: 'Usuarios y Seguridad', 
-      icon: ShieldCheck,
-      submodules: [
-        { id: 'permisos', name: 'Permisos', icon: ShieldCheck, route: '/admin/permisos' },
-        { id: 'roles', name: 'Roles', icon: Users, route: '/admin/roles' },
-        { id: 'usuarios', name: 'Usuarios', icon: Users, route: '/admin/usuarios' },
-      ] 
+    {
+      id: "dashboard",
+      name: "Dashboard",
+      icon: BarChart3,
+      route: "/admin/dashboard",
     },
     {
-      id: 'administracion-interna',
-      name: 'Administración Interna',
+      id: "usuarios-sistema",
+      name: "Usuarios y Seguridad",
+      icon: ShieldCheck,
+      submodules: [
+        {
+          id: "permisos",
+          name: "Permisos",
+          icon: ShieldCheck,
+          route: "/admin/permisos",
+        },
+        { id: "roles", name: "Roles", icon: Users, route: "/admin/roles" },
+        {
+          id: "usuarios",
+          name: "Usuarios",
+          icon: Users,
+          route: "/admin/usuarios",
+        },
+      ],
+    },
+    {
+      id: "administracion-interna",
+      name: "Administración Interna",
       icon: UserCog,
       submodules: [
-        { id: 'personal', name: 'Personal', icon: Users, route: '/admin/personal' },
-        { id: 'residentes', name: 'Residentes', icon: Users, route: '/admin/residentes' },
-      ]
+        {
+          id: "personal",
+          name: "Personal",
+          icon: Users,
+          route: "/admin/personal",
+        },
+        {
+          id: "residentes",
+          name: "Residentes",
+          icon: Users,
+          route: "/admin/residentes",
+        },
+      ],
     },
-    { id: 'bitacora', name: 'Bitácora', icon: BookOpen, route: "/admin/bitacora" },
+    {
+      id: "notificaciones",
+      name: "Notificaciones",
+      icon: Bell,
+      route: "/admin/notificaciones",
+    },
+    {
+      id: "bitacora",
+      name: "Bitácora",
+      icon: BookOpen,
+      route: "/admin/bitacora",
+    },
   ];
 
   return (
-    <aside className={`h-full bg-sky-100 relative border-r border-gray-200 transition-all duration-300 ${collapsed ? 'w-[64px]' : 'w-[320px]'}`}>
-      <div className={`p-6 flex flex-col h-full ${collapsed ? 'items-center px-2' : ''}`}>
-        <div className={`flex items-center gap-2 mb-6 ${collapsed ? 'justify-center' : ''}`}>
+    <aside
+      className={`h-full bg-sky-100 relative border-r border-gray-200 transition-all duration-300 ${
+        collapsed ? "w-[64px]" : "w-[320px]"
+      }`}
+    >
+      <div
+        className={`p-6 flex flex-col h-full ${
+          collapsed ? "items-center px-2" : ""
+        }`}
+      >
+        <div
+          className={`flex items-center gap-2 mb-6 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
           {!collapsed && (
-            <Link to="/admin/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link
+              to="/admin/home"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
               <CondominiumIcon className="w-8 h-8" />
-              <span className="text-lg font-bold text-blue-700">Smart Condominium</span>
+              <span className="text-lg font-bold text-blue-700">
+                Smart Condominium
+              </span>
             </Link>
           )}
           {collapsed && (
@@ -115,7 +169,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
             </button>
           )}
         </div>
-        <nav className={`space-y-2 flex-1 ${collapsed ? 'w-full' : ''}`}>
+        <nav className={`space-y-2 flex-1 ${collapsed ? "w-full" : ""}`}>
           {sidebarModules.map((module) => (
             <div key={module.id} className="flex flex-col">
               {/* Elemento principal del módulo */}
@@ -127,14 +181,16 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                     navigate(module.route);
                   }
                 }}
-                className={`w-full flex items-center px-2 py-2 text-sm rounded-lg text-left transition-colors ${ 
+                className={`w-full flex items-center px-2 py-2 text-sm rounded-lg text-left transition-colors ${
                   isModuleActive(module)
-                    ? 'bg-blue-400 text-white' 
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-blue-400 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                <module.icon className={collapsed ? 'w-6 h-6 mx-auto' : 'w-5 h-5 mr-3'} />
-                
+                <module.icon
+                  className={collapsed ? "w-6 h-6 mx-auto" : "w-5 h-5 mr-3"}
+                />
+
                 {!collapsed && (
                   <>
                     <span className="flex-1">{module.name}</span>
@@ -148,27 +204,31 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                   </>
                 )}
               </button>
-              
+
               {/* Submódulos, solo visibles cuando no está colapsado y el módulo está expandido */}
-              {!collapsed && module.submodules?.length && isExpanded(module.id) && (
-                <div className="ml-5 mt-1 space-y-1 border-l-2 border-gray-200 pl-3">
-                  {module.submodules.map((submodule) => (
-                    <button
-                      key={submodule.id}
-                      onClick={() => submodule.route && navigate(submodule.route)}
-                      className={`w-full flex items-center px-2 py-1.5 text-sm rounded-md text-left transition-colors ${ 
-                        submodule.route && isRouteActive(submodule.route)
-                          ? 'bg-blue-300 text-white' 
-                          : 'text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      <submodule.icon className="w-4 h-4 mr-2" />
-                      <span>{submodule.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              
+              {!collapsed &&
+                module.submodules?.length &&
+                isExpanded(module.id) && (
+                  <div className="ml-5 mt-1 space-y-1 border-l-2 border-gray-200 pl-3">
+                    {module.submodules.map((submodule) => (
+                      <button
+                        key={submodule.id}
+                        onClick={() =>
+                          submodule.route && navigate(submodule.route)
+                        }
+                        className={`w-full flex items-center px-2 py-1.5 text-sm rounded-md text-left transition-colors ${
+                          submodule.route && isRouteActive(submodule.route)
+                            ? "bg-blue-300 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        <submodule.icon className="w-4 h-4 mr-2" />
+                        <span>{submodule.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
               {/* Mostrar indicadores de submódulos cuando está colapsado */}
               {collapsed && module.submodules?.length && (
                 <div className="flex justify-center">

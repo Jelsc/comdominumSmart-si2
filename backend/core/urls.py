@@ -48,6 +48,8 @@ urlpatterns = [
     # ML: servicios de inteligencia artificial
     path("api/ml/", include("services.urls")),
     
+    # Notificaciones: gestión de notificaciones del condominio
+    path("api/notificaciones/", include("notificaciones.urls")),
     
     path("api/bitacora/", include("bitacora.urls")),
 

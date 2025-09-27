@@ -11,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
-  User? _currentUser;
+  Residente? _currentResidente;
   bool _isLoading = true;
 
   @override
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final response = await _authService.getCurrentUser();
       if (response.success && response.data != null) {
         setState(() {
-          _currentUser = response.data;
+          _currentResidente = response.data;
           _isLoading = false;
         });
       } else {
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MoviFleet'),
+        title: const Text('Condominio Smart'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Hola ${_currentUser?.firstName ?? 'Usuario'}',
+                      'Hola ${_currentResidente?.firstName ?? 'Residente'}',
                       style: const TextStyle(fontSize: 18, color: Colors.grey),
                     ),
 
@@ -109,20 +109,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 16),
                             _buildInfoRow(
                               'Usuario',
-                              _currentUser?.username ?? '',
+                              _currentResidente?.username ?? '',
                             ),
-                            _buildInfoRow('Email', _currentUser?.email ?? ''),
+                            _buildInfoRow(
+                              'Email',
+                              _currentResidente?.email ?? '',
+                            ),
                             _buildInfoRow(
                               'Nombre',
-                              '${_currentUser?.firstName ?? ''} ${_currentUser?.lastName ?? ''}',
+                              '${_currentResidente?.firstName ?? ''} ${_currentResidente?.lastName ?? ''}',
                             ),
                             _buildInfoRow(
                               'Teléfono',
-                              _currentUser?.telefono ?? 'No especificado',
+                              _currentResidente?.telefono ?? 'No especificado',
+                            ),
+                            _buildInfoRow(
+                              'Unidad',
+                              _currentResidente?.unidadHabitacional ??
+                                  'No asignada',
+                            ),
+                            _buildInfoRow(
+                              'Tipo',
+                              _currentResidente?.tipo.toUpperCase() ??
+                                  'No especificado',
                             ),
                             _buildInfoRow(
                               'Estado',
-                              _currentUser?.isActive == true
+                              _currentResidente?.isActive == true
                                   ? 'Activo'
                                   : 'Inactivo',
                             ),

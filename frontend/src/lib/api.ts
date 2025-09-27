@@ -62,6 +62,12 @@ api.interceptors.request.use(
       config.headers["Content-Type"] = "application/json";
     }
 
+    // 🔑 AGREGAR TOKEN DE AUTENTICACIÓN AUTOMÁTICAMENTE
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -90,6 +96,17 @@ api.interceptors.response.use(
           "Datos inválidos";
       } else if (status === 401) {
         msg = "No autorizado. Verifica tus credenciales.";
+        // 🔄 Limpiar tokens expirados/inválidos
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+        // Redirigir al login si no estamos ya ahí
+        if (
+          !window.location.pathname.includes("/admin") &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/admin";
+        }
       } else if (status === 403) {
         msg = "No tienes permisos para realizar esta acción.";
       } else if (status === 404) {
