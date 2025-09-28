@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "@/app/layout/admin-layout";
-import { BarChart3, Truck, Users, Settings, MapPin, UserCog } from "lucide-react";
+import {
+  BarChart3,
+  Truck,
+  Users,
+  Settings,
+  MapPin,
+  UserCog,
+  Shield,
+  Camera,
+  Eye,
+  Car,
+  AlertTriangle,
+  UserCheck,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { se } from "date-fns/locale";
-
 
 interface SidebarModule {
   id: string;
@@ -20,7 +32,6 @@ interface ModuleOption {
   icon?: React.ComponentType<any>;
 }
 
-
 const sidebarModules: SidebarModule[] = [
   {
     id: "dashboard",
@@ -28,7 +39,12 @@ const sidebarModules: SidebarModule[] = [
     icon: BarChart3,
     route: "/admin/dashboard",
     options: [
-      { id: "ver-dashboard", label: "Ver dashboard", route: "/admin/dashboard", icon: BarChart3 },
+      {
+        id: "ver-dashboard",
+        label: "Ver dashboard",
+        route: "/admin/dashboard",
+        icon: BarChart3,
+      },
     ],
   },
   {
@@ -37,8 +53,18 @@ const sidebarModules: SidebarModule[] = [
     icon: UserCog,
     route: "/admin/residentes ",
     options: [
-      { id: "residentes", label: "Residentes", route: "/admin/residentes", icon: Users },
-      { id: "personal", label: "Personal", route: "/admin/personal", icon: Users },
+      {
+        id: "residentes",
+        label: "Residentes",
+        route: "/admin/residentes",
+        icon: Users,
+      },
+      {
+        id: "personal",
+        label: "Personal",
+        route: "/admin/personal",
+        icon: Users,
+      },
     ],
   },
   {
@@ -47,9 +73,74 @@ const sidebarModules: SidebarModule[] = [
     icon: Settings,
     route: "/admin/mantenimiento",
     options: [
-      { id: "panel", label: "Panel", route: "/admin/mantenimiento", icon: Settings },
-      { id: "tareas", label: "Tareas", route: "/admin/mantenimiento/tareas", icon: Settings },
-      { id: "talleres", label: "Talleres", route: "/admin/mantenimiento/talleres", icon: MapPin },
+      {
+        id: "panel",
+        label: "Panel",
+        route: "/admin/mantenimiento",
+        icon: Settings,
+      },
+      {
+        id: "tareas",
+        label: "Tareas",
+        route: "/admin/mantenimiento/tareas",
+        icon: Settings,
+      },
+      {
+        id: "talleres",
+        label: "Talleres",
+        route: "/admin/mantenimiento/talleres",
+        icon: MapPin,
+      },
+    ],
+  },
+  {
+    id: "ia-seguridad",
+    name: "Seguridad con IA",
+    icon: Shield,
+    route: "/admin/ia-seguridad",
+    options: [
+      {
+        id: "dashboard",
+        label: "Dashboard IA",
+        route: "/admin/ia-seguridad",
+        icon: Eye,
+      },
+      {
+        id: "camaras",
+        label: "Control de Cámaras",
+        route: "/admin/ia-seguridad/camaras",
+        icon: Camera,
+      },
+      {
+        id: "reconocimiento-facial",
+        label: "Reconocimiento Facial",
+        route: "/admin/ia-seguridad/reconocimiento-facial",
+        icon: UserCheck,
+      },
+      {
+        id: "visitantes",
+        label: "Detección Visitantes",
+        route: "/admin/ia-seguridad/visitantes",
+        icon: Users,
+      },
+      {
+        id: "vehiculos",
+        label: "Identificación Vehículos",
+        route: "/admin/ia-seguridad/vehiculos",
+        icon: Car,
+      },
+      {
+        id: "alertas",
+        label: "Alertas de Seguridad",
+        route: "/admin/ia-seguridad/alertas",
+        icon: AlertTriangle,
+      },
+      {
+        id: "accesos",
+        label: "Registro de Accesos",
+        route: "/admin/ia-seguridad/accesos",
+        icon: Settings,
+      },
     ],
   },
   {
@@ -58,9 +149,19 @@ const sidebarModules: SidebarModule[] = [
     icon: Users,
     route: "/admin/usuarios",
     options: [
-      { id: "usuarios", label: "Usuarios", route: "/admin/usuarios", icon: Users },
+      {
+        id: "usuarios",
+        label: "Usuarios",
+        route: "/admin/usuarios",
+        icon: Users,
+      },
       { id: "roles", label: "Roles", route: "/admin/roles", icon: UserCog },
-      { id: "permisos", label: "Permisos", route: "/admin/permisos", icon: Settings },
+      {
+        id: "permisos",
+        label: "Permisos",
+        route: "/admin/permisos",
+        icon: Settings,
+      },
     ],
   },
   {
@@ -69,7 +170,12 @@ const sidebarModules: SidebarModule[] = [
     icon: BarChart3,
     route: "/admin/bitacora",
     options: [
-      { id: "ver", label: "Ver bitácora", route: "/admin/bitacora", icon: BarChart3 },
+      {
+        id: "ver",
+        label: "Ver bitácora",
+        route: "/admin/bitacora",
+        icon: BarChart3,
+      },
     ],
   },
 ];
@@ -108,7 +214,9 @@ export default function AdminPage() {
             onClick={() => openModule(module)}
           >
             <module.icon className="w-10 h-10 text-blue-600 mb-3" />
-            <span className="text-lg font-semibold text-gray-700">{module.name}</span>
+            <span className="text-lg font-semibold text-gray-700">
+              {module.name}
+            </span>
           </button>
         ))}
       </div>
@@ -147,9 +255,16 @@ export default function AdminPage() {
 
             <div className="p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(selected?.options?.length ? selected.options : [
-                  { id: "ir", label: "Ir al módulo", route: selected?.route || "/" },
-                ]).map((opt) => (
+                {(selected?.options?.length
+                  ? selected.options
+                  : [
+                      {
+                        id: "ir",
+                        label: "Ir al módulo",
+                        route: selected?.route || "/",
+                      },
+                    ]
+                ).map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => opt.route && goTo(opt.route)}
@@ -160,7 +275,9 @@ export default function AdminPage() {
                     ) : (
                       <span className="inline-block w-5 h-5 rounded bg-blue-100" />
                     )}
-                    <span className="font-medium text-gray-700">{opt.label}</span>
+                    <span className="font-medium text-gray-700">
+                      {opt.label}
+                    </span>
                   </button>
                 ))}
               </div>

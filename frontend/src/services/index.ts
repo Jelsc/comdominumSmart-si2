@@ -19,3 +19,9 @@ export { tokenUtils } from "./api";
 
 // Exportar servicios de notificaciones
 export { notificacionesService } from "./notificacionesService";
+
+// Exportar servicios de IA Seguridad
+export { iaSecurityService } from "./iaSecurityService";
+
+// Exportar servicios de IA
+export { default as aiService } from "./aiService";

@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "Smart Condominium APIs",
+    "description": "Colección de APIs para Smart Condominium",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": "http://localhost:8000/api/auth/login/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "IA Seguridad",
+      "item": [
+        {
+          "name": "Listar Vehículos",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/api/ia-seguridad/vehiculos/"
+          }
+        },
+        {
+          "name": "Listar Alertas",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/api/ia-seguridad/alertas/"
+          }
+        },
+        {
+          "name": "Registros de Acceso",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/api/ia-seguridad/registros-acceso/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finanzas",
+      "item": [
+        {
+          "name": "Tipos de Cuota",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/api/finanzas/tipos-cuota/"
+          }
+        },
+        {
+          "name": "Cuotas",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/api/finanzas/cuotas/"
+          }
+        }
+      ]
+    }
+  ]
+}

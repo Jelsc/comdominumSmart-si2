@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Condominium - Panel de Pruebas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .modules {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .module {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+        }
+
+        .module.ia {
+            border-left-color: #e74c3c;
+        }
+
+        .module.finanzas {
+            border-left-color: #2ecc71;
+        }
+
+        .module.reservas {
+            border-left-color: #3498db;
+        }
+
+        .module.mantenimiento {
+            border-left-color: #f39c12;
+        }
+
+        .module h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .endpoints {
+            list-style: none;
+        }
+
+        .endpoints li {
+            margin-bottom: 8px;
+        }
+
+        .endpoints a {
+            text-decoration: none;
+            color: #5a6c7d;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: block;
+            background: white;
+            border: 1px solid #e1e8ed;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .endpoints a:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 30px;
+        }
+
+        .stats {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat h4 {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Smart Condominium</h1>
+            <p>Panel de Pruebas - Sistema de Inteligencia Artificial</p>
+        </div>
+
+        <div class="status">
+            <strong>✅ Estado del Sistema:</strong> Todos los módulos operativos con datos de demostración cargados
+        </div>
+
+        <div class="instructions">
+            <strong>📋 Instrucciones:</strong>
+            Haz clic en cualquier enlace de API para ver los datos en formato JSON.
+            Para acceso completo usa: <strong>Usuario: admin</strong> | <strong>Contraseña: admin</strong>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <h4>11</h4>
+                <p>Residentes</p>
+            </div>
+            <div class="stat">
+                <h4>3</h4>
+                <p>Vehículos</p>
+            </div>
+            <div class="stat">
+                <h4>3</h4>
+                <p>Alertas IA</p>
+            </div>
+            <div class="stat">
+                <h4>4</h4>
+                <p>Áreas Comunes</p>
+            </div>
+        </div>
+
+        <div class="modules">
+            <!-- IA y Seguridad -->
+            <div class="module ia">
+                <h3>🤖 IA y Seguridad</h3>
+                <p style="margin-bottom: 15px; color: #666;">Reconocimiento facial, OCR placas, detección anomalías</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:8000/api/ia-seguridad/vehiculos/" target="_blank">🚗 Vehículos
+                            Autorizados</a></li>
+                    <li><a href="http://localhost:8000/api/ia-seguridad/alertas/" target="_blank">🚨 Alertas de
+                            Seguridad</a></li>
+                    <li><a href="http://localhost:8000/api/ia-seguridad/registros-acceso/" target="_blank">📝 Registros
+                            de Acceso</a></li>
+                    <li><a href="http://localhost:8000/api/ia-seguridad/fotos-residentes/" target="_blank">📸 Fotos
+                            Residentes</a></li>
+                    <li><a href="http://localhost:8000/api/ia-seguridad/visitantes/" target="_blank">👥 Visitantes</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="module finanzas">
+                <h3>💰 Gestión Financiera</h3>
+                <p style="margin-bottom: 15px; color: #666;">Cuotas, pagos, multas automáticas</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:8000/api/finanzas/tipos-cuota/" target="_blank">📋 Tipos de Cuota</a>
+                    </li>
+                    <li><a href="http://localhost:8000/api/finanzas/cuotas/" target="_blank">🧾 Cuotas</a></li>
+                    <li><a href="http://localhost:8000/api/finanzas/pagos/" target="_blank">💳 Pagos</a></li>
+                    <li><a href="http://localhost:8000/api/finanzas/configuracion/" target="_blank">⚙️ Configuración</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Reservas -->
+            <div class="module reservas">
+                <h3>📅 Sistema de Reservas</h3>
+                <p style="margin-bottom: 15px; color: #666;">Áreas comunes, calendario, pagos</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:8000/api/reservas/areas/" target="_blank">🏢 Áreas Comunes</a></li>
+                    <li><a href="http://localhost:8000/api/reservas/reservas/" target="_blank">📅 Reservas</a></li>
+                    <li><a href="http://localhost:8000/api/reservas/pagos-reserva/" target="_blank">💰 Pagos Reserva</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Mantenimiento -->
+            <div class="module mantenimiento">
+                <h3>🔧 Mantenimiento</h3>
+                <p style="margin-bottom: 15px; color: #666;">Tareas, materiales, incidentes</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:8000/api/mantenimiento/categorias/" target="_blank">📂 Categorías</a>
+                    </li>
+                    <li><a href="http://localhost:8000/api/mantenimiento/tareas/" target="_blank">⚙️ Tareas</a></li>
+                    <li><a href="http://localhost:8000/api/mantenimiento/materiales/" target="_blank">📦 Materiales</a>
+                    </li>
+                    <li><a href="http://localhost:8000/api/mantenimiento/incidentes/" target="_blank">🚨 Incidentes</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Usuarios Base -->
+            <div class="module" style="border-left-color: #9b59b6;">
+                <h3>👥 Gestión de Usuarios</h3>
+                <p style="margin-bottom: 15px; color: #666;">Residentes, personal, roles</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:8000/api/residentes/" target="_blank">🏠 Residentes</a></li>
+                    <li><a href="http://localhost:8000/api/personal/" target="_blank">👨‍💼 Personal</a></li>
+                    <li><a href="http://localhost:8000/api/bitacora/" target="_blank">📋 Bitácora</a></li>
+                    <li><a href="http://localhost:8000/admin" target="_blank">🛠️ Panel Admin</a></li>
+                </ul>
+            </div>
+
+            <!-- Herramientas -->
+            <div class="module" style="border-left-color: #1abc9c;">
+                <h3>🛠️ Herramientas</h3>
+                <p style="margin-bottom: 15px; color: #666;">Acceso directo a herramientas</p>
+                <ul class="endpoints">
+                    <li><a href="http://localhost:5173" target="_blank">🖥️ Frontend React</a></li>
+                    <li><a href="http://localhost:8025" target="_blank">📧 MailHog</a></li>
+                    <li><a href="http://localhost:8000/api/" target="_blank">🔗 API Root</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: #34495e; color: white; padding: 20px; text-align: center;">
+            <p><strong>🎉 Sistema Smart Condominium - 100% Funcional</strong></p>
+            <p style="margin-top: 5px; opacity: 0.8;">Todas las funcionalidades de IA implementadas con OpenCV +
+                Tesseract</p>
+        </div>
+    </div>
+</body>
+
+</html>

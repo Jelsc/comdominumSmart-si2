@@ -16,6 +16,15 @@ import UsuariosPage from "../pages/admin/usuarios/users.page";
 import NotificacionesPage from "../pages/admin/notificaciones/notificaciones.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 
+// IA Security Module
+import IASecurityDashboard from "../pages/admin/ia-seguridad/dashboard.page";
+import CameraManagementPage from "../pages/admin/ia-seguridad/camaras.page";
+import FacialRecognitionPage from "../pages/admin/ia-seguridad/reconocimiento-facial.page";
+import VisitorDetectionPage from "../pages/admin/ia-seguridad/visitantes.page";
+import VehicleRecognitionPage from "../pages/admin/ia-seguridad/vehiculos.page";
+import SecurityAlertsPage from "../pages/admin/ia-seguridad/alertas.page";
+import AccessLogPage from "../pages/admin/ia-seguridad/accesos.page";
+
 export default function AppRouter() {
   return (
     <Router>
@@ -116,6 +125,64 @@ export default function AppRouter() {
           element={
             <ProtectedRoute requireAdmin={true}>
               <div>Mantenimiento (por implementar)</div>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* IA Security Module Routes */}
+        <Route
+          path="/admin/ia-seguridad"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <IASecurityDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/camaras"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <CameraManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/reconocimiento-facial"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <FacialRecognitionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/visitantes"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <VisitorDetectionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/vehiculos"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <VehicleRecognitionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/alertas"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <SecurityAlertsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ia-seguridad/accesos"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AccessLogPage />
             </ProtectedRoute>
           }
         />

@@ -67,7 +67,8 @@ class Residente {
       unidadHabitacional: json['unidad_habitacional'],
       tipo: json['tipo'] ?? 'inquilino',
       estado: json['estado'] ?? 'activo',
-      isActive: json['puede_acceder'] ?? false, // Backend devuelve 'puede_acceder'
+      isActive:
+          json['puede_acceder'] ?? false, // Backend devuelve 'puede_acceder'
     );
   }
 
@@ -344,18 +345,15 @@ class AuthService {
       final response = await _apiRequest<Map<String, dynamic>>(
         '/api/residentes/',
       );
-      
+
       if (response.success && response.data != null) {
         final data = response.data!;
         // El endpoint devuelve un objeto paginado, tomamos el primer resultado
         if (data['results'] != null && data['results'].isNotEmpty) {
           final residenteData = data['results'][0];
           final residente = Residente.fromJson(residenteData);
-          
-          return ApiResponse<Residente>(
-            success: true,
-            data: residente,
-          );
+
+          return ApiResponse<Residente>(success: true, data: residente);
         } else {
           return ApiResponse<Residente>(
             success: false,
@@ -363,7 +361,7 @@ class AuthService {
           );
         }
       }
-      
+
       return ApiResponse<Residente>(
         success: false,
         error: response.error ?? 'Error al obtener datos del residente',

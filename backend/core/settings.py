@@ -118,6 +118,10 @@ INSTALLED_APPS = [
     "residentes",
     "personal",
     "notificaciones",
+    "ia_seguridad",  # Nueva app de IA y Seguridad
+    "finanzas",      # Nueva app de Finanzas
+    "reservas",      # Nueva app de Reservas
+    "mantenimiento", # Nueva app de Mantenimiento
     # Requisito para allauth
     "django.contrib.sites",
     # Allauth (core + cuentas + social)

@@ -1,3 +1,6 @@
+// Tipos del módulo IA Security
+export * from "./ia-security";
+
 // Tipos base para el sistema de transporte
 export type Personal = {
   id: number;

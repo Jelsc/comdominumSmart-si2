@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from users.auth_views import logout_view
 
 
@@ -48,6 +50,18 @@ urlpatterns = [
     # ML: servicios de inteligencia artificial
     path("api/ml/", include("services.urls")),
     
+    # IA y Seguridad: reconocimiento facial, OCR placas, alertas
+    path("api/ia-seguridad/", include("ia_seguridad.urls")),
+    
+    # Finanzas: gestión financiera del condominio
+    path("api/finanzas/", include("finanzas.urls")),
+    
+    # Reservas: gestión de reservas de áreas comunes
+    path("api/reservas/", include("reservas.urls")),
+    
+    # Mantenimiento: gestión de mantenimiento y reparaciones
+    path("api/mantenimiento/", include("mantenimiento.urls")),
+    
     # Notificaciones: gestión de notificaciones del condominio
     path("api/notificaciones/", include("notificaciones.urls")),
     
@@ -58,3 +72,7 @@ urlpatterns = [
     
     
 ]
+
+# Servir archivos media en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

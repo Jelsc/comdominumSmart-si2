@@ -56,6 +56,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
+      - media_files:/app/media # Volumen persistente para archivos multimedia
     command: bash -lc "python manage.py migrate --noinput || true && python manage.py seed user rol --force && python manage.py collectstatic --noinput || true && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
@@ -101,3 +102,4 @@ services:
 volumes:
   pgdata:
   redis_data:
+  media_files: # Volumen para archivos multimedia persistentes
