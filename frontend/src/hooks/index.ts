@@ -13,3 +13,4 @@ export * from './usePersonal';
 export * from './useRoles';
 export * from './useUsuarios';
 export * from './useNotificaciones';
+export * from './use-areas-comunes';

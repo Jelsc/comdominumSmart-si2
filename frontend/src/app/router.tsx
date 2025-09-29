@@ -16,6 +16,7 @@ import UsuariosPage from "../pages/admin/usuarios/users.page";
 import NotificacionesPage from "../pages/admin/notificaciones/notificaciones.page";
 import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
+import AreasComunesPage from "@/pages/admin/areas-comunes/areas-comunes.page";
 
 export default function AppRouter() {
   return (
@@ -71,15 +72,6 @@ export default function AppRouter() {
           }
         />
 
-        {/* Otras rutas de admin protegidas */}
-        <Route
-          path="/admin/flotas"
-          element={
-            <ProtectedRoute requireAdmin={true}>
-              <div>Flotas (por implementar)</div>
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/admin/residentes"
           element={
@@ -129,10 +121,10 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/admin/rutas"
+          path="/admin/areas-comunes"
           element={
             <ProtectedRoute requireAdmin={true}>
-              <div>Rutas (por implementar)</div>
+              <AreasComunesPage />
             </ProtectedRoute>
           }
         />

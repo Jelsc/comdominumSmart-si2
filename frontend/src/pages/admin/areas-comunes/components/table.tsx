@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Table,
   TableBody,
@@ -8,7 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +24,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import type { AreaComun } from "@/types/areas-comunes";
 
 interface AreasComunesTableProps {
@@ -26,6 +32,7 @@ interface AreasComunesTableProps {
   loading: boolean;
   onEdit: (area: AreaComun) => void;
   onDelete: (area: AreaComun) => void;
+  onView?: (area: AreaComun) => void;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -37,161 +44,176 @@ const currencyFormatter = new Intl.NumberFormat("es-BO", {
   minimumFractionDigits: 2,
 });
 
-const estadoStyles: Record<string, string> = {
-  ACTIVO: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  INACTIVO: "bg-gray-100 text-gray-600 border-gray-200",
-  MANTENIMIENTO: "bg-amber-100 text-amber-700 border-amber-200",
-};
-
-const estadoLabels: Record<string, string> = {
-  ACTIVO: "Activo",
-  INACTIVO: "Inactivo",
-  MANTENIMIENTO: "Mantenimiento",
-};
-
-const buildPaginationItems = (
-  page: number,
-  totalPages: number,
-  onPageChange: (page: number) => void
-) => {
-  const items: JSX.Element[] = [];
-
-  for (let current = 1; current <= totalPages; current += 1) {
-    if (current === 1 || current === totalPages || Math.abs(current - page) <= 1) {
-      items.push(
-        <PaginationItem key={current}>
-          <PaginationLink
-            isActive={current === page}
-            onClick={() => onPageChange(current)}
-          >
-            {current}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    } else if (
-      items[items.length - 1]?.key !== `ellipsis-${current}` &&
-      (current === page - 2 || current === page + 2)
-    ) {
-      items.push(
-        <PaginationItem key={`ellipsis-${current}`}>
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-  }
-
-  return items;
-};
-
-const formatCurrency = (value: string) => {
-  const numeric = Number(value);
-  if (Number.isNaN(numeric)) {
-    return value;
-  }
-  return currencyFormatter.format(numeric);
-};
-
-const AreasComunesTable = ({
+export function AreasComunesTable({
   data,
   loading,
   onEdit,
   onDelete,
+  onView,
   page,
   totalPages,
   onPageChange,
-}: AreasComunesTableProps) => {
+}: AreasComunesTableProps) {
+  const formatCurrency = (value: string | number) => {
+    const numeric = typeof value === 'string' ? Number(value) : value;
+    if (Number.isNaN(numeric)) {
+      return String(value);
+    }
+    return currencyFormatter.format(numeric);
+  };
+  
+  const getStatusBadge = (estado: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      'ACTIVO': 'default',
+      'INACTIVO': 'secondary',
+      'MANTENIMIENTO': 'destructive',
+    };
+
+    const labels: Record<string, string> = {
+      'ACTIVO': 'Activo',
+      'INACTIVO': 'Inactivo',
+      'MANTENIMIENTO': 'Mantenimiento',
+    };
+
+    return (
+      <Badge variant={variants[estado] || 'outline'}>
+        {labels[estado] || estado}
+      </Badge>
+    );
+  };
+
   if (loading) {
     return (
       <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="h-12 w-full animate-pulse rounded bg-muted" />
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-12 bg-gray-200 animate-pulse rounded" />
         ))}
       </div>
     );
   }
 
-  if (!data.length) {
+  if (!data || data.length === 0) {
     return (
-      <div className="py-12 text-center text-sm text-muted-foreground">
-        No se encontraron áreas comunes registradas.
+      <div className="text-center py-8 text-gray-500">
+        No se encontraron áreas comunes registradas
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <ScrollArea className="max-h-[480px]">
-        <div className="min-w-full">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Monto por hora</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="w-[120px] text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((area) => (
-                <TableRow key={area.id}>
-                  <TableCell className="font-medium">{area.nombre}</TableCell>
-                  <TableCell>{formatCurrency(area.monto_hora)}</TableCell>
-                  <TableCell>
-                    <Badge className={estadoStyles[area.estado] ?? ""} variant="outline">
-                      {estadoLabels[area.estado] ?? area.estado}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(area)}
-                        aria-label={`Editar ${area.nombre}`}
-                      >
-                        <Pencil className="h-4 w-4" />
+    <>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Monto por hora</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((area) => (
+              <TableRow key={area.id}>
+                <TableCell className="font-medium">{area.nombre}</TableCell>
+                <TableCell>{formatCurrency(area.monto_hora)}</TableCell>
+                <TableCell>{getStatusBadge(area.estado)}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {onView && (
+                        <DropdownMenuItem onClick={() => onView(area)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver detalles
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={() => onEdit(area)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
                         onClick={() => onDelete(area)}
-                        aria-label={`Eliminar ${area.nombre}`}
+                        className="text-red-600"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </ScrollArea>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
+      {/* Paginación */}
       {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => onPageChange(Math.max(1, page - 1))}
-                aria-disabled={page === 1}
-                className={page === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-            {buildPaginationItems(page, totalPages, onPageChange)}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                aria-disabled={page === totalPages}
-                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <div className="flex justify-center mt-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => page > 1 && onPageChange(page - 1)}
+                  size="default"
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const pageNumber = i + 1;
+                const isActive = pageNumber === page;
+                
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      onClick={() => onPageChange(pageNumber)}
+                      isActive={isActive}
+                      size="icon"
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              {totalPages > 5 && (
+                <>
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink
+                      onClick={() => onPageChange(totalPages)}
+                      isActive={page === totalPages}
+                      size="icon"
+                      className="cursor-pointer"
+                    >
+                      {totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                </>
+              )}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => page < totalPages && onPageChange(page + 1)}
+                  size="default"
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       )}
-    </div>
+    </>
   );
-};
+}
 
 export default AreasComunesTable;

@@ -20,6 +20,7 @@ class BaseSeeder:
         'PersonalSeeder',
         'UnidadSeeder',
         'ResidenteSeeder',
+        'AreaComunSeeder',
     ]
     
     # Mapa de dependencias entre seeders

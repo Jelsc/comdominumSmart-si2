@@ -11,6 +11,8 @@ import {
   BookOpen,
   Home,
   Bell,
+  LandPlot,
+  WavesLadder
 } from "lucide-react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -122,6 +124,19 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           name: 'Unidades Habitacionales',
           icon: Home,
           route: '/admin/unidades'
+        },
+      ],
+    },
+    {
+      id: "areas-comunes",
+      name: "Áreas Comunes",
+      icon: LandPlot,
+      submodules: [
+        {
+          id: "areas-comunes",
+          name: "Áreas Comunes",
+          icon: WavesLadder,
+          route: "/admin/areas-comunes"
         },
       ],
     },

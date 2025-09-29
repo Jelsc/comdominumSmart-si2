@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/app/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,28 +9,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { PlusCircle } from "lucide-react";
-import { useAreasComunes } from "./components/use-areas-comunes";
+import { Plus, Home, CheckCircle, AlertTriangle, Settings } from "lucide-react";
+import { useAreasComunes } from "@/hooks";
 import AreasComunesFilters from "./components/filters";
 import AreasComunesTable from "./components/table";
 import AreaComunStore from "./components/store";
 import AreaComunDelete from "./components/delete";
-import type { AreaComunForm } from "@/types/areas-comunes";
-import type {
-  AreasComunesApiResponse,
-} from "@/services/areas-comunes.api";
+import type { AreaComunForm, EstadoArea } from "@/types/areas-comunes";
+import type { AreasComunesApiResponse } from "@/services/areas-comunes.api";
 import type { AreaComun } from "@/types/areas-comunes";
 
+// Constante para paginación
 const PAGE_SIZE = 10;
 
 const buildParams = (
   page: number,
-  estado: string,
+  estado: EstadoArea | "all",
   search: string
 ) => ({
   page,
   page_size: PAGE_SIZE,
-  ...(estado !== "all" ? { estado } : {}),
+  ...(estado !== "all" ? { estado: estado as EstadoArea } : {}),
   ...(search ? { search } : {}),
 });
 
@@ -73,7 +72,7 @@ const AreasComunesPage = () => {
   useEffect(() => {
     const params = buildParams(page, estadoFilter, debouncedSearch);
     void loadData(params);
-  }, [page, debouncedSearch, estadoFilter, loadData]);
+  }, [page, debouncedSearch, estadoFilter]);
 
   const handleStoreSubmit = (values: AreaComunForm) => {
     if (selectedItem) {
@@ -124,28 +123,67 @@ const AreasComunesPage = () => {
             </p>
           </div>
           <Button onClick={handleOpenCreate} className="flex items-center gap-2">
-            <PlusCircle className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Nueva área común
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtros</CardTitle>
-            <CardDescription>
-              Filtra por estado y busca por nombre para encontrar áreas específicas.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AreasComunesFilters
-              estado={estadoFilter}
-              onEstadoChange={(value) => setEstadoFilter(value)}
-              search={search}
-              onSearchChange={setSearch}
-              loading={isTableLoading}
-            />
-          </CardContent>
-        </Card>
+        {/* Estadísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Áreas Activas</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {data?.results?.filter(a => a.estado === "ACTIVO").length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                En funcionamiento
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Áreas Inactivas</CardTitle>
+              <Settings className="h-4 w-4 text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-500">
+                {data?.results?.filter(a => a.estado === "INACTIVO").length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Fuera de servicio
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En Mantenimiento</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-amber-600">
+                {data?.results?.filter(a => a.estado === "MANTENIMIENTO").length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                En reparación
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <AreasComunesFilters
+          estado={estadoFilter}
+          onEstadoChange={(value) => setEstadoFilter(value)}
+          search={search}
+          onSearchChange={setSearch}
+          loading={isTableLoading}
+        />
+
 
         {error && (
           <Alert variant="destructive">
@@ -161,10 +199,7 @@ const AreasComunesPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Listado de áreas comunes</CardTitle>
-            <CardDescription>
-              Visualiza, edita o elimina las áreas comunes registradas.
-            </CardDescription>
+            <CardTitle>Lista de Áreas Comunes</CardTitle>
           </CardHeader>
           <CardContent>
             <AreasComunesTable
@@ -192,7 +227,7 @@ const AreasComunesPage = () => {
         open={isDeleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={handleDeleteConfirm}
-        area={selectedItem ?? undefined}
+        area={selectedItem ?? null}
         loading={loading && isDeleteModalOpen}
       />
     </AdminLayout>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -43,9 +43,7 @@ const schema = z.object({
     .trim()
     .min(3, "El nombre debe tener al menos 3 caracteres")
     .max(120, "El nombre debe tener máximo 120 caracteres"),
-  monto_hora: z.coerce
-    .number({ invalid_type_error: "Ingresa un monto válido" })
-    .min(0, "El monto debe ser mayor o igual a 0"),
+  monto_hora: z.coerce.number().min(0, "Ingresa un monto válido y mayor o igual a 0"),
   estado: z.enum(estadoValues),
 });
 
@@ -56,7 +54,7 @@ interface AreaComunStoreProps {
   onClose: () => void;
   initialData?: AreaComun | null;
   onSubmit: (
-    values: AreaComunForm
+    values: AreaComunFormValues
   ) => Promise<AreasComunesApiResponse<AreaComun>>;
   loading?: boolean;
 }
@@ -82,7 +80,8 @@ const estadoOptions: { value: EstadoArea; label: string }[] = estadoValues.map(
 const normalizeMonto = (value: number) => Number(value.toFixed(2));
 
 const mapToFormValues = (area?: AreaComun | null): AreaComunFormValues => {
-  const monto = area?.monto_hora ? Number.parseFloat(area.monto_hora) : 0;
+  // Convertir monto_hora a número independientemente de si es string o number
+  const monto = area?.monto_hora ? Number(area.monto_hora) : 0;
   return {
     nombre: area?.nombre ?? "",
     monto_hora: Number.isNaN(monto) ? 0 : monto,
@@ -106,7 +105,7 @@ export function AreaComunStore({
   const [submitting, setSubmitting] = useState(false);
   const isEdit = useMemo(() => Boolean(initialData), [initialData]);
 
-  const form = useForm<AreaComunFormValues>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues,
   });
@@ -117,10 +116,10 @@ export function AreaComunStore({
     }
   }, [form, initialData, open]);
 
-  const handleSubmit = async (values: AreaComunFormValues) => {
+  const handleSubmit: SubmitHandler<AreaComunFormValues> = async (values) => {
     setSubmitting(true);
     form.clearErrors();
-    const response = await onSubmit(mapToPayload(values));
+    const response = await onSubmit(values);
     setSubmitting(false);
 
     if (response.success) {
@@ -201,7 +200,7 @@ export function AreaComunStore({
                       step="0.01"
                       min="0"
                       {...field}
-                      value={Number.isNaN(field.value) ? "" : field.value}
+                      value={Number.isNaN(field.value as number) ? "" : (field.value as number)}
                       onChange={(event) => field.onChange(event.target.value)}
                       disabled={loading || submitting}
                     />
