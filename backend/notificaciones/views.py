@@ -22,10 +22,35 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     queryset = Notificacion.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsAdminPortalUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['tipo', 'estado', 'prioridad', 'es_individual', 'activa']
+    filterset_fields = ['tipo', 'prioridad', 'es_individual', 'activa', 'estado']
     search_fields = ['nombre', 'descripcion']
     ordering_fields = ['fecha_creacion', 'fecha_programada', 'prioridad', 'nombre']
     ordering = ['-fecha_creacion']
+    
+    def get_queryset(self):
+        """Filtrar notificaciones según el usuario y parámetros de consulta"""
+        queryset = super().get_queryset()
+        
+        # Verificar si se solicita sólo las notificaciones del usuario actual
+        if self.request.query_params.get('usuario_actual') == 'true':
+            # Filtramos para mostrar las notificaciones según los parámetros
+            
+            # Filtrar por estado
+            estado = self.request.query_params.get('estado')
+            if estado == 'no_leida':
+                # Mostrar todas excepto las que ya están marcadas como leídas
+                queryset = queryset.exclude(estado='leida')
+            elif estado:
+                queryset = queryset.filter(estado=estado)
+            
+            # Nuevo filtro para notificaciones no leídas usando parámetro no_leidas
+            no_leidas = self.request.query_params.get('no_leidas')
+            if no_leidas == 'true':
+                queryset = queryset.exclude(estado='leida')
+            
+            return queryset
+        
+        return queryset
     
     def get_serializer_class(self):
         """Usar diferentes serializers según la acción"""
@@ -129,6 +154,22 @@ class NotificacionViewSet(viewsets.ModelViewSet):
         serializer = RolSerializer(roles, many=True)
         return Response(serializer.data)
     
+    @action(detail=True, methods=['post'])
+    def marcar_como_leida(self, request, pk=None):
+        """
+        Marcar una notificación como leída para el usuario actual
+        """
+        notificacion = self.get_object()
+        
+        # Actualizar el estado a "leida"
+        notificacion.estado = 'leida'
+        notificacion.save()
+        
+        return Response({
+            'message': 'Notificación marcada como leída correctamente',
+            'notificacion_id': notificacion.id
+        })
+        
     @action(detail=False, methods=['get'])
     def usuarios_por_rol(self, request):
         """

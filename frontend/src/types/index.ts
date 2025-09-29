@@ -92,6 +92,7 @@ export type Role = {
   permisos: string[];
   fecha_creacion: string;
   fecha_actualizacion: string;
+  total_usuarios?: number; // Añadimos esta propiedad como opcional
 };
 
 // Tipos para formularios
@@ -173,12 +174,7 @@ export type ApiResponse<T = any> = {
   message?: string;
 };
 
-export type PaginatedResponse<T> = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-};
+// Ya se exporta PaginatedResponse desde notificaciones.ts
 
 // Tipos para autocompletado
 export type PersonalOption = {
@@ -203,106 +199,18 @@ export type ResidenteOption = {
 // Exportar tipos de unidades
 export type { Unidad, UnidadForm, UnidadFilterParams } from './unidades';
 
-// Tipos para Notificaciones
-export type Notificacion = {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  tipo:
-    | "general"
-    | "mantenimiento"
-    | "reunion"
-    | "emergencia"
-    | "evento"
-    | "cobranza";
-  tipo_display: string;
-  estado: "borrador" | "programada" | "enviada" | "cancelada";
-  estado_display: {
-    estado: string;
-    color: string;
-  };
-  roles_destinatarios: number[];
-  roles_destinatarios_info: {
-    id: number;
-    nombre: string;
-    descripcion: string;
-    total_usuarios: number;
-  }[];
-  es_individual: boolean;
-  fecha_programada: string | null;
-  fecha_expiracion: string | null;
-  prioridad: "baja" | "normal" | "alta" | "urgente";
-  prioridad_display: string;
-  requiere_confirmacion: boolean;
-  activa: boolean;
-  creado_por: number | null;
-  creado_por_info: {
-    id: number;
-    username: string;
-    email: string;
-    nombre_completo: string;
-  } | null;
-  fecha_creacion: string;
-  fecha_actualizacion: string;
-  total_destinatarios: number;
-};
-
-export type NotificacionFormData = {
-  nombre: string;
-  descripcion: string;
-  tipo:
-    | "general"
-    | "mantenimiento"
-    | "reunion"
-    | "emergencia"
-    | "evento"
-    | "cobranza";
-  estado: "borrador" | "programada" | "enviada" | "cancelada";
-  roles_destinatarios: number[];
-  es_individual: boolean;
-  usuarios_seleccionados?: number[];
-  fecha_programada: Date | null;
-  fecha_expiracion: Date | null;
-  prioridad: "baja" | "normal" | "alta" | "urgente";
-  requiere_confirmacion: boolean;
-  activa: boolean;
-};
-
-export type NotificacionFilters = {
-  search?: string;
-  tipo?: string;
-  estado?: string;
-  prioridad?: string;
-  es_individual?: boolean;
-  activa?: boolean;
-  rol_destinatario?: number;
-  fecha_desde?: string;
-  fecha_hasta?: string;
-};
+// Exportar tipos actualizados de notificaciones
+export type {
+  Notificacion,
+  NotificacionFormData,
+  NotificacionFilters,
+  NotificacionEstadisticas,
+  PaginatedResponse
+} from './notificaciones';
 
 export type RolOption = {
   id: number;
-  name: string;
   nombre: string;
   descripcion: string;
-  total_usuarios: number;
-};
-
-export type NotificacionEstadisticas = {
-  total: number;
-  por_estado: {
-    borrador: number;
-    programada: number;
-    enviada: number;
-    cancelada: number;
-  };
-  por_tipo: Record<string, number>;
-  por_prioridad: {
-    baja: number;
-    normal: number;
-    alta: number;
-    urgente: number;
-  };
-  individuales: number;
-  activas: number;
+  total_usuarios?: number; // Hacemos este campo opcional
 };

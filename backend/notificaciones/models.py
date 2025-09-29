@@ -21,6 +21,7 @@ class Notificacion(models.Model):
         ('programada', 'Programada'),
         ('enviada', 'Enviada'),
         ('cancelada', 'Cancelada'),
+        ('leida', 'Leída'),
     ]
 
     # Campos principales

@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('residentes', '0002_auto_update_unidad_relation'),
-        ('residentes', '0002_residente_usuario'),
         ('residentes', '0003_update_unidad_habitacional_field'),
     ]
 

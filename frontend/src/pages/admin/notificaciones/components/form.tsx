@@ -65,7 +65,8 @@ const notificacionSchema = z.object({
     "reunion",
     "emergencia",
     "evento",
-    "cobranza",
+    "aviso",
+    "pagos",
   ]),
   estado: z.enum(["borrador", "programada"]),
   roles_destinatarios: z
@@ -97,7 +98,8 @@ const tiposNotificacion = [
   { value: "reunion", label: "Reunión", icon: Users },
   { value: "emergencia", label: "Emergencia", icon: AlertTriangle },
   { value: "evento", label: "Evento", icon: Calendar },
-  { value: "cobranza", label: "Cobranza", icon: Clock },
+  { value: "aviso", label: "Aviso", icon: Bell },
+  { value: "pagos", label: "Pagos", icon: Clock },
 ];
 
 const prioridades = [
@@ -153,10 +155,16 @@ export function NotificacionForm({
   // Cargar datos del formulario cuando se edita
   useEffect(() => {
     if (notificacion) {
+      // Convertir tipo si es necesario (compatibilidad con datos antiguos)
+      let tipoCompatible: any = notificacion.tipo;
+      if (tipoCompatible === "cobranza") {
+        tipoCompatible = "pagos";
+      }
+      
       form.reset({
         nombre: notificacion.nombre,
         descripcion: notificacion.descripcion,
-        tipo: notificacion.tipo,
+        tipo: tipoCompatible as "general" | "mantenimiento" | "reunion" | "emergencia" | "evento" | "aviso" | "pagos",
         estado:
           notificacion.estado === "enviada" ||
           notificacion.estado === "cancelada"
@@ -262,7 +270,7 @@ export function NotificacionForm({
   const getTotalDestinatarios = (rolesSeleccionados: number[]) => {
     return roles
       .filter((rol) => rolesSeleccionados.includes(rol.id))
-      .reduce((total, rol) => total + rol.total_usuarios, 0);
+      .reduce((total, rol) => total + (rol.total_usuarios || 0), 0);
   };
 
   const getUsuariosPorRoles = (rolesSeleccionados: number[]) => {
@@ -273,7 +281,7 @@ export function NotificacionForm({
       .map((rol) => ({
         rolId: rol.id,
         rolNombre: rol.nombre,
-        totalUsuarios: rol.total_usuarios,
+        totalUsuarios: rol.total_usuarios || 0,
       }));
   };
 
@@ -500,7 +508,7 @@ export function NotificacionForm({
                                   {rol.nombre}
                                 </span>
                                 <Badge variant="outline">
-                                  {rol.total_usuarios} usuarios
+                                  {rol.total_usuarios !== undefined ? rol.total_usuarios : 0} usuarios
                                 </Badge>
                               </div>
                             </div>

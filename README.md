@@ -70,6 +70,7 @@ docker-compose exec backend python manage.py migrate
 # SEEDERS:
 # Para ejecutar todos los seeders automáticamente:
 docker-compose exec backend python manage.py seed
+docker-compose exec backend python manage.py seed residente
 
 # Para ejecutar seeders específicos (por nombre, sin el sufijo "_seeder"):
 docker compose exec backend python manage.py seed user rol

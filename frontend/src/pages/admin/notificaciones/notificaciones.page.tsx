@@ -1,314 +1,264 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Search, Filter, BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "react-hot-toast";
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Bell, AlertTriangle, CheckCircle, Search, Filter } from 'lucide-react';
+import { useNotificaciones } from '@/hooks/useNotificaciones';
+import { useRoles } from '@/hooks/useRoles'; // Añadido hook de roles
+import { NotificacionesTable } from './components/table';
+import { NotificacionesFilters } from './components/filters';
+import { NotificacionForm } from './components/form';
+import { NotificacionDeleteDialog } from './components/delete-dialog';
+import { NotificacionesStats } from './components/stats';
+import AdminLayout from '@/app/layout/admin-layout';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import type { NotificacionFilters } from '@/types';
 
-import {
-  NotificacionesTable,
-  NotificacionesFilters,
-  NotificacionDeleteDialog,
-  NotificacionForm,
-  NotificacionesStats,
-} from "./components";
-
-import { notificacionesService } from "@/services";
-import type {
-  Notificacion,
-  NotificacionFilters as Filters,
-  NotificacionEstadisticas,
-  RolOption,
-  NotificacionFormData,
-  PaginatedResponse,
-} from "@/types";
+const ITEMS_PER_PAGE = 10;
 
 export default function NotificacionesPage() {
-  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState<number>(1);
+  const [search, setSearch] = useState<string>("");
+  const [searchDebounced, setSearchDebounced] = useState<string>("");
+  const [estadoFilter, setEstadoFilter] = useState<string>("all");
+  const [tipoFilter, setTipoFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [showStats, setShowStats] = useState(false);
-  const [editingNotificacion, setEditingNotificacion] =
-    useState<Notificacion | null>(null);
-  const [deletingNotificacion, setDeletingNotificacion] =
-    useState<Notificacion | null>(null);
-  const [filters, setFilters] = useState<Filters>({});
-  const [estadisticas, setEstadisticas] =
-    useState<NotificacionEstadisticas | null>(null);
-  const [roles, setRoles] = useState<RolOption[]>([]);
 
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 10;
+  // Obtenemos los roles para el formulario
+  const { roles, loading: loadingRoles } = useRoles();
 
-  // No need for hook, using toast directly
+  const {
+    data,
+    loading,
+    error,
+    selectedItem,
+    isStoreModalOpen,
+    isDeleteModalOpen,
+    showStats,
+    estadisticas,
+    filters,
+    loadData,
+    createItem,
+    updateItem,
+    deleteItem,
+    openStoreModal,
+    closeStoreModal,
+    openDeleteModal,
+    closeDeleteModal,
+    toggleStats,
+    setFilters,
+    clearError,
+  } = useNotificaciones();
 
-  const loadNotificaciones = async () => {
-    try {
-      setLoading(true);
-      const searchParams: any = {
-        ...filters,
-        page: currentPage,
-        page_size: pageSize,
-      };
-      if (searchTerm) {
-        searchParams.search = searchTerm;
-      }
-      const response = await notificacionesService.getNotificaciones(
-        searchParams
-      );
-
-      setNotificaciones(response.results);
-      setTotalCount(response.count);
-      setTotalPages(Math.ceil(response.count / pageSize));
-    } catch (error) {
-      toast.error("No se pudieron cargar las notificaciones");
-      console.error("Error loading notificaciones:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Función para cargar datos con filtros y paginación
+  const fetchNotificaciones = async (pageNumber = 1, searchQuery = "", estado = "all", tipo = "all") => {
+    const newFilters: NotificacionFilters = {
+      ...(searchQuery && { search: searchQuery }),
+      ...(estado !== "all" && { estado }),
+      ...(tipo !== "all" && { tipo }),
+      page: pageNumber,
+      page_size: ITEMS_PER_PAGE,
+    };
+    
+    await loadData(newFilters);
   };
 
-  const loadEstadisticas = async () => {
-    try {
-      const stats = await notificacionesService.getEstadisticas();
-      setEstadisticas(stats);
-    } catch (error) {
-      console.error("Error loading estadisticas:", error);
-    }
+  // Efecto para cargar las notificaciones al inicio y cuando cambien los filtros
+  useEffect(() => {
+    fetchNotificaciones(page, searchDebounced, estadoFilter, tipoFilter);
+  }, [page, searchDebounced, estadoFilter, tipoFilter]);
+
+  // Efecto para el debounce del término de búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchDebounced(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Manejadores de eventos
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
-  const loadRoles = async () => {
-    try {
-      const rolesData = await notificacionesService.getRolesDisponibles();
-      setRoles(rolesData);
-    } catch (error) {
-      console.error("Error loading roles:", error);
-    }
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleEstadoFilterChange = (value: string) => {
+    setEstadoFilter(value);
+    setPage(1);
+  };
+
+  const handleTipoFilterChange = (value: string) => {
+    setTipoFilter(value);
+    setPage(1);
   };
 
   const handleClearFilters = () => {
-    setFilters({});
-    setSearchTerm("");
+    setSearch("");
+    setSearchDebounced("");
+    setEstadoFilter("all");
+    setTipoFilter("all");
+    setPage(1);
   };
 
-  useEffect(() => {
-    loadNotificaciones();
-  }, [searchTerm, filters, currentPage]);
-
-  useEffect(() => {
-    loadEstadisticas();
-    loadRoles();
-  }, []);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1); // Reset to first page on search
-  };
-
-  const handleFiltersChange = (newFilters: Filters) => {
+  const handleFiltersChange = (newFilters: NotificacionFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page on filter change
   };
 
-  const handleCreate = () => {
-    setEditingNotificacion(null);
-    setShowForm(true);
-  };
-
-  const handleEdit = (notificacion: Notificacion) => {
-    setEditingNotificacion(notificacion);
-    setShowForm(true);
-  };
-
-  const handleDelete = (notificacion: Notificacion) => {
-    setDeletingNotificacion(notificacion);
-  };
-
-  const handleFormSuccess = () => {
-    setShowForm(false);
-    setEditingNotificacion(null);
-    loadNotificaciones();
-    loadEstadisticas();
-    toast.success(
-      editingNotificacion
-        ? "Notificación actualizada correctamente"
-        : "Notificación creada correctamente"
-    );
-  };
-
-  const handleFormSubmit = async (data: NotificacionFormData) => {
-    try {
-      if (editingNotificacion) {
-        await notificacionesService.updateNotificacion(
-          editingNotificacion.id,
-          data
-        );
-      } else {
-        await notificacionesService.createNotificacion(data);
-      }
-      handleFormSuccess();
-    } catch (error) {
-      toast.error("Error al guardar la notificación");
-    }
-  };
-
-  const handleDeleteSuccess = () => {
-    setDeletingNotificacion(null);
-    loadNotificaciones();
-    loadEstadisticas();
-    toast.success("Notificación eliminada correctamente");
-  };
-
-  const handleEnviar = async (notificacion: Notificacion) => {
-    const result = await notificacionesService.enviarNotificacion(
-      notificacion.id
-    );
-    if (result.success) {
-      toast.success(result.message || "Notificación enviada correctamente");
-      loadNotificaciones();
-      loadEstadisticas();
-    } else {
-      toast.error(result.error || "Error al enviar la notificación");
-    }
-  };
-
-  const handleCancelar = async (notificacion: Notificacion) => {
-    const result = await notificacionesService.cancelarNotificacion(
-      notificacion.id
-    );
-    if (result.success) {
-      toast.success(result.message || "Notificación cancelada correctamente");
-      loadNotificaciones();
-      loadEstadisticas();
-    } else {
-      toast.error(result.error || "Error al cancelar la notificación");
-    }
-  };
+  // Calcular estadísticas para tarjetas
+  const notificacionesLeidas = estadisticas?.leidas || 0;
+  const notificacionesNoLeidas = estadisticas?.no_leidas || 0;
+  const totalNotificaciones = (data?.count || 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Gestión de Notificaciones
-          </h1>
-          <p className="text-muted-foreground">
-            Administra las notificaciones del condominio
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowStats(!showStats)}
-            className="gap-2"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Estadísticas
-          </Button>
-          <Button onClick={handleCreate} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nueva Notificación
-          </Button>
-        </div>
-      </div>
-
-      {/* Estadísticas */}
-      {showStats && estadisticas && (
-        <NotificacionesStats estadisticas={estadisticas} />
-      )}
-
-      {/* Controles */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Buscador */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar notificaciones..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Filtros */}
+    <AdminLayout>
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Notificaciones</h1>
+          <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+              onClick={toggleStats}
+              variant={showStats ? "secondary" : "outline"}
             >
-              <Filter className="h-4 w-4" />
-              Filtros
-              {Object.keys(filters).length > 0 && (
-                <Badge variant="secondary">{Object.keys(filters).length}</Badge>
-              )}
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Estadísticas
+            </Button>
+            <Button onClick={() => openStoreModal()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Notificación
             </Button>
           </div>
+        </div>
 
-          {/* Panel de filtros */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t">
-              <NotificacionesFilters
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                roles={roles}
-                onClearFilters={handleClearFilters}
-              />
+        {/* Tarjetas de estadísticas */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total Notificaciones</CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalNotificaciones}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Leídas</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{notificacionesLeidas}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">No Leídas</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{notificacionesNoLeidas}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Estadísticas detalladas */}
+        {showStats && estadisticas && (
+          <NotificacionesStats estadisticas={estadisticas} />
+        )}
+
+        {/* Controles de búsqueda y filtros */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Buscador */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar notificaciones..."
+                    value={search}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Filtros */}
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Filtros
+                {Object.keys(filters).length > 0 && (
+                  <Badge variant="secondary">{Object.keys(filters).length}</Badge>
+                )}
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Tabla de notificaciones */}
-      <NotificacionesTable
-        notificaciones={notificaciones}
-        loading={loading}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalCount={totalCount}
-        onPageChange={setCurrentPage}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onEnviar={handleEnviar}
-        onCancelar={handleCancelar}
-      />
+            {/* Panel de filtros */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t">
+                <NotificacionesFilters
+                  estadoFilter={estadoFilter}
+                  tipoFilter={tipoFilter}
+                  onEstadoChange={handleEstadoFilterChange}
+                  onTipoChange={handleTipoFilterChange}
+                  onClearFilters={handleClearFilters}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Dialogs */}
-      {showForm && (
-        <NotificacionForm
-          notificacion={editingNotificacion}
-          open={showForm}
-          onOpenChange={(open) => !open && setShowForm(false)}
-          roles={roles}
-          onSubmit={handleFormSubmit}
+        {/* Tabla de notificaciones */}
+        <NotificacionesTable
+          data={data?.results || []}
+          loading={loading}
+          onEdit={(item) => item && openStoreModal(item)}
+          onDelete={(item) => item && openDeleteModal(item)}
+          page={page}
+          totalPages={data?.total_pages ?? 1}
+          onPageChange={handlePageChange}
         />
-      )}
 
-      {deletingNotificacion && (
-        <NotificacionDeleteDialog
-          notificacion={deletingNotificacion}
-          open={!!deletingNotificacion}
-          onOpenChange={(open) => !open && setDeletingNotificacion(null)}
-          onConfirm={handleDeleteSuccess}
-        />
-      )}
-    </div>
+        {/* Modal para crear/editar notificación */}
+        {isStoreModalOpen && (
+          <NotificacionForm
+            open={isStoreModalOpen}
+            onOpenChange={closeStoreModal}
+            onSubmit={async (data) => {
+              if (selectedItem) {
+                await updateItem(selectedItem.id, data);
+              } else {
+                await createItem(data);
+              }
+            }}
+            notificacion={selectedItem}
+            roles={roles}
+            loading={loading || loadingRoles}
+          />
+        )}
+
+        {/* Modal para confirmar eliminación */}
+        {isDeleteModalOpen && selectedItem && (
+          <NotificacionDeleteDialog
+            open={isDeleteModalOpen}
+            onOpenChange={closeDeleteModal}
+            onConfirm={() => {
+              deleteItem(selectedItem.id);
+              closeDeleteModal();
+            }}
+            notificacion={selectedItem}
+            loading={loading}
+          />
+        )}
+      </div>
+    </AdminLayout>
   );
 }

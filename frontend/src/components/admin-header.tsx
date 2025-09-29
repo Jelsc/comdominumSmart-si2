@@ -1,7 +1,8 @@
-import { Bell, HelpCircle, MessageCircle } from 'lucide-react';
+import { HelpCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NavUserHeader } from '@/components/nav-user-header';
 import Breadcrumb from '@/components/breadcrumb';
+import { NotificationsButton } from '@/components/notifications-button';
 
 export default function Header() {
   return (
@@ -14,9 +15,7 @@ export default function Header() {
                 <Button variant="ghost" size="icon" className="p-2 rounded-full bg-gray-100">
                   <HelpCircle className="size-5 text-gray-500" />
                 </Button>
-                <Button variant="ghost" size="icon" className="p-2 rounded-full bg-gray-100">
-                  <Bell className="size-5 text-gray-500" />
-                </Button>
+                <NotificationsButton />
                 <Button variant="ghost" size="icon" className="p-2 rounded-full bg-gray-100">
                   <MessageCircle className="size-5 text-gray-500" />
                 </Button>

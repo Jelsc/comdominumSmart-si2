@@ -2,14 +2,7 @@ import React from "react";
 import {
   Edit,
   Trash2,
-  Send,
-  X,
-  Eye,
-  Clock,
-  Users,
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   Table,
@@ -21,339 +14,186 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import type { Notificacion } from "@/types";
-import { notificacionesService } from "@/services";
 
 interface NotificacionesTableProps {
-  notificaciones: Notificacion[];
+  data: Notificacion[];
   loading: boolean;
-  currentPage: number;
-  totalPages: number;
-  totalCount: number;
-  onPageChange: (page: number) => void;
   onEdit: (notificacion: Notificacion) => void;
   onDelete: (notificacion: Notificacion) => void;
-  onEnviar: (notificacion: Notificacion) => void;
-  onCancelar: (notificacion: Notificacion) => void;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 export function NotificacionesTable({
-  notificaciones,
+  data,
   loading,
-  currentPage,
-  totalPages,
-  totalCount,
-  onPageChange,
   onEdit,
   onDelete,
-  onEnviar,
-  onCancelar,
+  page,
+  totalPages,
+  onPageChange
 }: NotificacionesTableProps) {
-  const getEstadoBadge = (notificacion: Notificacion) => {
-    const color = notificacion.estado_display.color;
-    const variant =
-      color === "green"
-        ? "default"
-        : color === "blue"
-        ? "secondary"
-        : color === "red"
-        ? "destructive"
-        : "outline";
-
+  const getTipoBadge = (tipo: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      'INFORMATIVA': 'default',
+      'URGENTE': 'destructive',
+      'RECORDATORIO': 'secondary',
+    };
+    
     return (
-      <Badge variant={variant} className="gap-1">
-        {notificacion.estado === "programada" && <Clock className="h-3 w-3" />}
-        {notificacion.estado === "enviada" && <Send className="h-3 w-3" />}
-        {notificacion.estado === "cancelada" && <X className="h-3 w-3" />}
-        {notificacion.estado_display.estado}
+      <Badge variant={variants[tipo] || 'outline'}>
+        {tipo}
       </Badge>
     );
   };
 
-  const getPrioridadBadge = (notificacion: Notificacion) => {
-    const color = notificacionesService.getPrioridadColor(
-      notificacion.prioridad
-    );
-    const variant =
-      color === "red"
-        ? "destructive"
-        : color === "orange"
-        ? "secondary"
-        : color === "green"
-        ? "default"
-        : "outline";
-
+  const getEstadoBadge = (estado: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      'PENDIENTE': 'outline',
+      'ENVIADA': 'default',
+      'LEIDA': 'secondary',
+      'CANCELADA': 'destructive',
+    };
+    
     return (
-      <Badge variant={variant} className="gap-1">
-        {notificacion.prioridad === "urgente" && (
-          <AlertTriangle className="h-3 w-3" />
-        )}
-        {notificacion.prioridad_display}
+      <Badge variant={variants[estado] || 'outline'}>
+        {estado}
       </Badge>
     );
-  };
-
-  const canEnviar = (notificacion: Notificacion) => {
-    return notificacion.estado === "programada";
-  };
-
-  const canCancelar = (notificacion: Notificacion) => {
-    return notificacion.estado !== "enviada";
   };
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <Skeleton className="h-12 w-12 rounded" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-12 bg-gray-200 animate-pulse rounded" />
+        ))}
+      </div>
     );
   }
 
-  if (notificaciones.length === 0) {
+  if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-12 text-center">
-          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <Send className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No hay notificaciones</h3>
-          <p className="text-muted-foreground mb-4">
-            No se encontraron notificaciones que coincidan con los filtros
-            aplicados.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8 text-gray-500">
+        No hay notificaciones disponibles
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Notificación</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Prioridad</TableHead>
-                <TableHead>Destinatarios</TableHead>
-                <TableHead>Programada</TableHead>
-                <TableHead>Creada por</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+    <>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Fecha Creación</TableHead>
+              <TableHead>Destinatarios</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((notificacion) => (
+              <TableRow key={notificacion.id}>
+                <TableCell className="font-medium">{notificacion.titulo}</TableCell>
+                <TableCell>{getTipoBadge(notificacion.tipo)}</TableCell>
+                <TableCell>{getEstadoBadge(notificacion.estado)}</TableCell>
+                <TableCell>{new Date(notificacion.fecha_creacion).toLocaleDateString()}</TableCell>
+                <TableCell>{notificacion.destinatarios?.nombre || "Todos"}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(notificacion)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onDelete(notificacion)} className="text-red-600">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {notificaciones.map((notificacion) => (
-                <TableRow key={notificacion.id}>
-                  {/* Nombre y descripción */}
-                  <TableCell className="max-w-xs">
-                    <div>
-                      <div className="font-medium truncate">
-                        {notificacion.nombre}
-                      </div>
-                      <div className="text-sm text-muted-foreground truncate">
-                        {notificacion.descripcion}
-                      </div>
-                    </div>
-                  </TableCell>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-                  {/* Tipo */}
-                  <TableCell>
-                    <Badge variant="outline">{notificacion.tipo_display}</Badge>
-                  </TableCell>
-
-                  {/* Estado */}
-                  <TableCell>{getEstadoBadge(notificacion)}</TableCell>
-
-                  {/* Prioridad */}
-                  <TableCell>{getPrioridadBadge(notificacion)}</TableCell>
-
-                  {/* Destinatarios */}
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {notificacion.total_destinatarios}
-                      </span>
-                      {notificacion.es_individual && (
-                        <Badge variant="secondary" className="ml-1">
-                          Individual
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Fecha programada */}
-                  <TableCell>
-                    <div className="text-sm">
-                      {notificacionesService.formatFecha(
-                        notificacion.fecha_programada
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Creado por */}
-                  <TableCell>
-                    <div className="text-sm">
-                      {notificacion.creado_por_info?.nombre_completo ||
-                        notificacion.creado_por_info?.username ||
-                        "No disponible"}
-                    </div>
-                  </TableCell>
-
-                  {/* Acciones */}
-                  <TableCell className="text-right">
-                    <TooltipProvider>
-                      <div className="flex justify-end gap-1">
-                        {/* Enviar */}
-                        {canEnviar(notificacion) && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => onEnviar(notificacion)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Enviar notificación</TooltipContent>
-                          </Tooltip>
-                        )}
-
-                        {/* Cancelar */}
-                        {canCancelar(notificacion) &&
-                          notificacion.estado !== "cancelada" && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onCancelar(notificacion)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Cancelar notificación
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-
-                        {/* Editar */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onEdit(notificacion)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Editar notificación</TooltipContent>
-                        </Tooltip>
-
-                        {/* Eliminar */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onDelete(notificacion)}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Eliminar notificación</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TooltipProvider>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              Mostrando {(currentPage - 1) * 10 + 1} a{" "}
-              {Math.min(currentPage * 10, totalCount)} de {totalCount}{" "}
-              notificaciones
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="gap-1"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Anterior
-              </Button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      variant={page === currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => onPageChange(page)}
-                      className="w-8"
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="gap-1"
-              >
-                Siguiente
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Paginación */}
+      <div className="flex justify-center mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => page > 1 && onPageChange(page - 1)}
+                className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              const pageNumber = i + 1;
+              const isActive = pageNumber === page;
+              
+              return (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink
+                    onClick={() => onPageChange(pageNumber)}
+                    isActive={isActive}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            {totalPages > 5 && (
+              <>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink onClick={() => onPageChange(totalPages)}>
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => page < totalPages && onPageChange(page + 1)}
+                className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </>
   );
 }

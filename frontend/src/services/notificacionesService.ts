@@ -200,10 +200,15 @@ class NotificacionesService {
    * Obtiene los roles disponibles para asignar a notificaciones
    */
   async getRolesDisponibles(): Promise<RolOption[]> {
-    const response = await api.get<RolOption[]>(
-      `${this.baseUrl}/notificaciones/roles_disponibles/`
-    );
-    return response.data;
+    try {
+      const response = await api.get<RolOption[]>(
+        `${this.baseUrl}/notificaciones/roles_disponibles/`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener roles disponibles:", error);
+      return [];
+    }
   }
 
   /**
