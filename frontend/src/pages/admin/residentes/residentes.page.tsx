@@ -8,6 +8,8 @@ import { ResidenteFiltersComponent } from './components/filters';
 import { ResidenteStore } from './components/store';
 import { ResidenteDelete } from './components/delete';
 import AdminLayout from '@/app/layout/admin-layout';
+import { getUnidades } from '@/services/unidadesService';
+import type { Unidad } from '@/types/unidades';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -18,6 +20,8 @@ export default function ResidentesPage() {
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [tipoFilter, setTipoFilter] = useState<string>("all");
   const [unidadFilter, setUnidadFilter] = useState<string>("all");
+  const [unidades, setUnidades] = useState<Array<{id: number, codigo: string, direccion: string}>>([]);
+  const [loadingUnidades, setLoadingUnidades] = useState<boolean>(false);
 
   const {
     data,
@@ -64,6 +68,29 @@ export default function ResidentesPage() {
   useEffect(() => {
     fetchResidentes(page, searchDebounced, estadoFilter, tipoFilter, unidadFilter);
   }, [page, searchDebounced, estadoFilter, tipoFilter, unidadFilter]);
+  
+  // Cargar unidades habitacionales
+  useEffect(() => {
+    const fetchUnidades = async () => {
+      try {
+        setLoadingUnidades(true);
+        const response = await getUnidades({});
+        
+        if (response.success && response.data) {
+          setUnidades(response.data.results);
+        }
+      } catch (error) {
+        console.error('Error al cargar unidades:', error);
+        // Establecer un array vacío en lugar de dejar el estado anterior
+        setUnidades([]);
+        // No mostrar mensaje de error para evitar interrumpir la experiencia
+      } finally {
+        setLoadingUnidades(false);
+      }
+    };
+    
+    fetchUnidades();
+  }, []);
 
   const handleCreate = () => {
     openStoreModal();
@@ -189,10 +216,13 @@ export default function ResidentesPage() {
         search={search}
         estadoFilter={estadoFilter}
         tipoFilter={tipoFilter}
+        unidadFilter={unidadFilter}
         onSearchChange={setSearch}
         onEstadoFilterChange={setEstadoFilter}
         onTipoFilterChange={setTipoFilter}
-        loading={loading}
+        onUnidadFilterChange={setUnidadFilter}
+        unidades={unidades}
+        loading={loading || loadingUnidades}
       />
 
       {/* Tabla */}

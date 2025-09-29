@@ -50,6 +50,9 @@ urlpatterns = [
     
     
     path("api/bitacora/", include("bitacora.urls")),
+    
+    # Unidades: gestión de unidades habitacionales
+    path("api/unidades/", include("unidades.urls")),
 
     # Auth social: endpoints para login social (navegador)
     path("accounts/", include("allauth.urls")),

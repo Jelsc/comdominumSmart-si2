@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { getUnidades } from '@/services/unidadesService';
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,8 @@ import {
 } from '@/components/ui/form';
 import { DatePicker } from '@/components/date-picker';
 import { Loader2 } from 'lucide-react';
-import type { Residente, ResidenteFormData } from '@/types';
+import type { Residente } from '@/types';
+import type { Unidad } from '@/types/unidades';
 import { toast } from 'sonner';
 
 // Esquema de validación para residentes
@@ -42,17 +44,20 @@ const residenteSchema = z.object({
   telefono: z.string().min(8, 'El teléfono debe tener al menos 8 caracteres'),
   email: z.string().email('Email inválido'),
   ci: z.string().min(7, 'La CI debe tener al menos 7 caracteres'),
-  unidad_habitacional: z.string().min(1, 'La unidad habitacional es requerida'),
+  unidad_habitacional: z.string().optional(),
   tipo: z.enum(['propietario', 'inquilino']),
   fecha_ingreso: z.date().nullable(),
   estado: z.enum(['activo', 'inactivo', 'suspendido', 'en_proceso']),
   usuario: z.number().optional(),
-}) satisfies z.ZodType<ResidenteFormData>;
+});
+
+// Extraer el tipo inferido del esquema
+type ResidenteFormValues = z.infer<typeof residenteSchema>;
 
 interface ResidenteStoreProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ResidenteFormData) => Promise<boolean>;
+  onSubmit: (data: ResidenteFormValues) => Promise<boolean>;
   initialData?: Residente | null;
   loading?: boolean;
 }
@@ -69,8 +74,12 @@ export function ResidenteStore({
   const description = isEdit 
     ? 'Modifica la información del residente seleccionado' 
     : 'Agrega un nuevo residente';
+    
+  // Estado para almacenar las unidades habitacionales disponibles
+  const [unidades, setUnidades] = useState<Unidad[]>([]);
+  const [loadingUnidades, setLoadingUnidades] = useState(false);
 
-  const form = useForm<ResidenteFormData>({
+  const form = useForm<ResidenteFormValues>({
     resolver: zodResolver(residenteSchema),
     defaultValues: {
       nombre: '',
@@ -85,16 +94,50 @@ export function ResidenteStore({
     },
   });
 
+  // Cargar las unidades habitacionales
+  useEffect(() => {
+    const fetchUnidades = async () => {
+      if (!isOpen) return;
+      
+      try {
+        setLoadingUnidades(true);
+        const response = await getUnidades({ estado: '' });
+        if (response.success && response.data) {
+          setUnidades(response.data.results);
+        }
+      } catch (error) {
+        console.error('Error al cargar unidades:', error);
+        // No mostrar toast de error para evitar frustración del usuario
+        // toast.error('No se pudieron cargar las unidades habitacionales');
+        // Asegurarse de tener un array vacío para evitar errores
+        setUnidades([]);
+      } finally {
+        setLoadingUnidades(false);
+      }
+    };
+    
+    fetchUnidades();
+  }, [isOpen]);
+
   // Cargar datos iniciales cuando se abre el modal en modo edición
   useEffect(() => {
     if (isOpen && initialData) {
+      // Verificar si el código de unidad existe en la lista
+      let unidadValue = initialData.unidad_habitacional || '';
+      if (
+        !unidadValue ||
+        unidadValue === '' ||
+        !unidades.some((u) => u.codigo === unidadValue)
+      ) {
+        unidadValue = '';
+      }
       form.reset({
         nombre: initialData.nombre,
         apellido: initialData.apellido,
         telefono: initialData.telefono,
         email: initialData.email,
         ci: initialData.ci,
-        unidad_habitacional: initialData.unidad_habitacional,
+        unidad_habitacional: unidadValue,
         tipo: initialData.tipo,
         fecha_ingreso: initialData.fecha_ingreso ? new Date(initialData.fecha_ingreso) : null,
         estado: initialData.estado,
@@ -116,9 +159,9 @@ export function ResidenteStore({
     }
   }, [isOpen, initialData, form]);
 
-  const handleSubmit = async (data: ResidenteFormData) => {
+  const handleSubmit = async (data: ResidenteFormValues) => {
     // Validación manual para asegurar que tenemos todos los campos necesarios
-    if (!data.nombre || !data.apellido || !data.telefono || !data.email || !data.ci || !data.unidad_habitacional) {
+    if (!data.nombre || !data.apellido || !data.telefono || !data.email || !data.ci) {
       toast.error('Por favor completa todos los campos obligatorios');
       return;
     }
@@ -255,15 +298,45 @@ export function ResidenteStore({
                 <FormField
                   control={form.control}
                   name="unidad_habitacional"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Unidad Habitacional *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ej: A-101, B-205" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    // El valor siempre debe ser string y no puede ser vacío
+                    const value = typeof field.value === 'string' && field.value !== "" ? field.value : 'none';
+                    return (
+                      <FormItem>
+                        <FormLabel>Unidad Habitacional</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                          value={value}
+                          disabled={loadingUnidades}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={loadingUnidades ? "Cargando unidades..." : "Seleccionar unidad"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">-- Sin unidad asignada --</SelectItem>
+                            {unidades
+                              .filter((unidad) => 
+                                typeof unidad.codigo === 'string' && 
+                                unidad.codigo.trim() !== "" && 
+                                unidad.codigo !== "" && 
+                                unidad.codigo !== null
+                              )
+                              .map((unidad) => (
+                                <SelectItem key={unidad.id} value={unidad.codigo || `unidad-${unidad.id}`}>
+                                  {unidad.codigo} - {unidad.direccion} ({unidad.estado === "OCUPADA" ? "Ocupada" : unidad.estado === "DESOCUPADA" ? "Desocupada" : "En Mantenimiento"})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        {!loadingUnidades && unidades.length === 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">No hay unidades habitacionales disponibles.</p>
+                        )}
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
             </div>

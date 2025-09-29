@@ -117,11 +117,29 @@ export async function apiRequest<T>(
     if (error.response) {
       // Error de respuesta del servidor
       const errorData = error.response.data;
+      console.log('Error response from API:', error.response.status, errorData); // Log para depuración
+      
+      // Construir mensaje descriptivo para errores de validación
+      let errorMessage = "Error en la petición";
+      
+      if (typeof errorData === 'object' && errorData !== null) {
+        // Si tenemos un objeto de errores de validación
+        const firstErrorKey = Object.keys(errorData)[0];
+        if (firstErrorKey) {
+          const firstError = errorData[firstErrorKey];
+          if (Array.isArray(firstError) && firstError.length > 0) {
+            errorMessage = firstError[0];
+          } else if (typeof firstError === 'string') {
+            errorMessage = firstError;
+          }
+        }
+      }
+      
       throw new ApiError(
         errorData.error ||
           errorData.message ||
           errorData.detail ||
-          "Error en la petición",
+          errorMessage,
         error.response.status,
         errorData
       );

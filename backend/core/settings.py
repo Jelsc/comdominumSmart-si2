@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     # "dj_rest_auth.jwt_auth",
     "bitacora",
+    "unidades",
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"

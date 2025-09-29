@@ -71,6 +71,14 @@ export const residentesApi = {
     if (filters?.search) params.append('search', filters.search);
     if (filters?.estado) params.append('estado', filters.estado);
     if (filters?.tipo) params.append('tipo', filters.tipo);
+    // Solo enviar el filtro si es válido
+    if (
+      filters?.unidad_habitacional &&
+      filters.unidad_habitacional !== 'all' &&
+      filters.unidad_habitacional !== ''
+    ) {
+      params.append('unidad_habitacional', filters.unidad_habitacional);
+    }
     
     const query = params.toString();
     const response = await apiRequest(`/api/residentes/${query ? `?${query}` : ''}`);

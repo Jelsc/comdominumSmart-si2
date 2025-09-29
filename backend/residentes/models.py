@@ -51,11 +51,13 @@ class Residente(models.Model):
         default=""
     )
     
-    # Información específica del residente
+    # Campo para unidad habitacional (ahora usa directamente el código)
     unidad_habitacional = models.CharField(
-        max_length=20,
-        verbose_name="Número de Casa",
-        default=""
+        max_length=10,
+        verbose_name="Código de Unidad Habitacional",
+        null=True,
+        blank=True,
+        help_text="Código de la unidad (ej: A-101, B-202)"
     )
     
     tipo = models.CharField(
@@ -107,7 +109,7 @@ class Residente(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.get_full_name()} - Casa {self.unidad_habitacional}"
+        return f"{self.get_full_name()} - {self.unidad_habitacional or 'Sin unidad'}"
     
     def get_full_name(self):
         """Retorna el nombre completo del residente"""
@@ -140,3 +142,14 @@ class Residente(models.Model):
             self.usuario.is_active and 
             self.estado == 'activo'
         )
+        
+    def get_unidad(self):
+        """
+        Retorna el objeto UnidadHabitacional relacionado, o None si no hay código de unidad.
+        """
+        if not self.unidad_habitacional:
+            return None
+            
+        # Importamos aquí para evitar importaciones circulares
+        from unidades.models import UnidadHabitacional
+        return UnidadHabitacional.find_by_code(self.unidad_habitacional)

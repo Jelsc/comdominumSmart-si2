@@ -9,6 +9,7 @@ import {
   ChevronUp,
   ShieldCheck,
   BookOpen,
+  Home,
 
 } from 'lucide-react';
 
@@ -90,6 +91,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       submodules: [
         { id: 'personal', name: 'Personal', icon: Users, route: '/admin/personal' },
         { id: 'residentes', name: 'Residentes', icon: Users, route: '/admin/residentes' },
+        { id: 'unidades', name: 'Unidades Habitacionales', icon: Home, route: '/admin/unidades' },
       ]
     },
     { id: 'bitacora', name: 'Bitácora', icon: BookOpen, route: "/admin/bitacora" },

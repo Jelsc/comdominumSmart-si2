@@ -30,7 +30,7 @@ export type Residente = {
   email: string;
   telefono: string;
   // Campos específicos de Residente
-  unidad_habitacional: string;
+  unidad_habitacional: string; // Código de la unidad habitacional
   tipo: 'propietario' | 'inquilino';
   fecha_ingreso: string;
   estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
@@ -118,7 +118,7 @@ export type ResidenteFormData = {
   ci: string;
   email: string;
   telefono: string;
-  unidad_habitacional: string;
+  unidad_habitacional: string; // Volvemos al campo original: código de unidad
   tipo: 'propietario' | 'inquilino';
   fecha_ingreso: Date | null;
   estado: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
@@ -155,6 +155,7 @@ export type ResidenteFilters = {
   search?: string;
   estado?: 'activo' | 'inactivo' | 'suspendido' | 'en_proceso';
   tipo?: 'propietario' | 'inquilino';
+  unidad_habitacional?: string; // Código de la unidad habitacional
 };
 
 export type UsuarioFilters = {
@@ -198,3 +199,6 @@ export type ResidenteOption = {
   telefono: string;
   unidad_habitacional: string;
 };
+
+// Exportar tipos de unidades
+export type { Unidad, UnidadForm, UnidadFilterParams } from './unidades';

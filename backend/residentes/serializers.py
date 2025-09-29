@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class ResidenteSerializer(serializers.ModelSerializer):
-    """Serializer para el modelo Residente"""
+    """Serializer para el modelo Residente - Refactorizado"""
     
     # Campos del usuario relacionado
     username = serializers.CharField(source='usuario.username', read_only=True, allow_null=True)
@@ -16,6 +16,9 @@ class ResidenteSerializer(serializers.ModelSerializer):
     nombre_completo = serializers.CharField(read_only=True)
     puede_acceder = serializers.BooleanField(read_only=True)
     estado_usuario = serializers.CharField(read_only=True)
+    
+    # Campo para unidad habitacional (usando el código)
+    unidad_habitacional = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     class Meta:
         model = Residente
@@ -73,10 +76,30 @@ class ResidenteSerializer(serializers.ModelSerializer):
                 "La fecha de ingreso no puede ser futura."
             )
         return value
+    
+    def validate_unidad_habitacional(self, value):
+        """Valida que el código de unidad habitacional exista en el sistema"""
+        from unidades.models import UnidadHabitacional
+        
+        # Si está vacío, es válido
+        if not value:
+            return value
+            
+        # Verificar que el código de unidad existe
+        try:
+            UnidadHabitacional.objects.get(codigo=value)
+            return value
+        except UnidadHabitacional.DoesNotExist:
+            raise serializers.ValidationError(
+                f"No existe una unidad habitacional con el código '{value}'."
+            )
 
 
 class ResidenteCreateSerializer(serializers.ModelSerializer):
     """Serializer para crear residentes"""
+    
+    # Campo para unidad habitacional (usando el código)
+    unidad_habitacional = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = Residente
@@ -115,10 +138,30 @@ class ResidenteCreateSerializer(serializers.ModelSerializer):
                 "La fecha de ingreso no puede ser futura."
             )
         return value
+        
+    def validate_unidad_habitacional(self, value):
+        """Valida que el código de unidad habitacional exista en el sistema"""
+        from unidades.models import UnidadHabitacional
+        
+        # Si está vacío, es válido
+        if not value:
+            return value
+            
+        # Verificar que el código de unidad existe
+        try:
+            UnidadHabitacional.objects.get(codigo=value)
+            return value
+        except UnidadHabitacional.DoesNotExist:
+            raise serializers.ValidationError(
+                f"No existe una unidad habitacional con el código '{value}'."
+            )
 
 
 class ResidenteUpdateSerializer(serializers.ModelSerializer):
     """Serializer para actualizar residentes"""
+    
+    # Campo para unidad habitacional (usando el código)
+    unidad_habitacional = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     class Meta:
         model = Residente
@@ -163,3 +206,20 @@ class ResidenteUpdateSerializer(serializers.ModelSerializer):
                 "La fecha de ingreso no puede ser futura."
             )
         return value
+        
+    def validate_unidad_habitacional(self, value):
+        """Valida que el código de unidad habitacional exista en el sistema"""
+        from unidades.models import UnidadHabitacional
+        
+        # Si está vacío, es válido
+        if not value:
+            return value
+            
+        # Verificar que el código de unidad existe
+        try:
+            UnidadHabitacional.objects.get(codigo=value)
+            return value
+        except UnidadHabitacional.DoesNotExist:
+            raise serializers.ValidationError(
+                f"No existe una unidad habitacional con el código '{value}'."
+            )

@@ -22,7 +22,7 @@ class ResidenteViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     # Campos válidos para filtrado/búsqueda/ordenamiento
-    filterset_fields = ["estado", "tipo", "usuario"]
+    filterset_fields = ["estado", "tipo", "usuario", "unidad_habitacional"]
     search_fields = ["nombre", "apellido", "email", "ci", "unidad_habitacional"]
     ordering_fields = ["nombre", "fecha_creacion", "fecha_ingreso", "unidad_habitacional"]
     ordering = ["-fecha_creacion"]

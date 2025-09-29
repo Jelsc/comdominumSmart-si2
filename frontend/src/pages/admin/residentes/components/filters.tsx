@@ -16,9 +16,12 @@ interface ResidenteFiltersProps {
   search: string;
   estadoFilter: string;
   tipoFilter: string;
+  unidadFilter: string;
   onSearchChange: (value: string) => void;
   onEstadoFilterChange: (value: string) => void;
   onTipoFilterChange: (value: string) => void;
+  onUnidadFilterChange: (value: string) => void;
+  unidades: { id: number; codigo: string; direccion: string; }[];
   loading?: boolean;
 }
 
@@ -26,9 +29,12 @@ export function ResidenteFiltersComponent({
   search,
   estadoFilter,
   tipoFilter,
+  unidadFilter,
   onSearchChange,
   onEstadoFilterChange,
   onTipoFilterChange,
+  onUnidadFilterChange,
+  unidades = [],
   loading = false 
 }: ResidenteFiltersProps) {
 
@@ -41,7 +47,7 @@ export function ResidenteFiltersComponent({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -75,6 +81,20 @@ export function ResidenteFiltersComponent({
               <SelectItem value="all">Todos los tipos</SelectItem>
               <SelectItem value="propietario">Propietario</SelectItem>
               <SelectItem value="inquilino">Inquilino</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={unidadFilter} onValueChange={onUnidadFilterChange} disabled={loading}>
+            <SelectTrigger>
+              <SelectValue placeholder="Unidad Habitacional" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las unidades</SelectItem>
+              {unidades.map((unidad) => (
+                <SelectItem key={unidad.id} value={unidad.codigo}>
+                  {unidad.codigo} - {unidad.direccion}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

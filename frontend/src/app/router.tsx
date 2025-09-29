@@ -8,6 +8,7 @@ import BitacoraPage from "@/pages/admin/bitacora.page";
 import PersonalPage from "../pages/admin/personal/personal.page";
 import ResidentesPage from "../pages/admin/residentes/residentes.page";
 import UsuariosPage from "../pages/admin/usuarios/users.page";
+import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 
 export default function AppRouter() {
@@ -96,6 +97,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute requireAdmin={true}>
               <div>Mantenimiento (por implementar)</div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/unidades"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <UnidadesPage />
             </ProtectedRoute>
           }
         />

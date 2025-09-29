@@ -1,13 +1,14 @@
 """
 Comando de gestión de Django para ejecutar los seeders.
-Este comando permite ejecutar todos los seeders o seeders específicos
-desde la línea de comandos.
+Este comando es el método oficial para ejecutar seeders en la aplicación,
+aprovechando el sistema de dependencias automáticas en BaseSeeder.
 
 Uso:
     python manage.py seed [nombre_seeder1 nombre_seeder2 ...]
     
-    - Sin argumentos: ejecuta todos los seeders
-    - Con argumentos: ejecuta solo los seeders especificados
+    - Sin argumentos: ejecuta todos los seeders disponibles en orden
+    - Con argumentos: ejecuta solo los seeders especificados (y sus dependencias)
+    - Con --force: ejecuta los seeders incluso si should_run() devuelve False
 """
 import importlib
 import inspect
@@ -81,15 +82,15 @@ class Command(BaseCommand):
         else:
             seeders_to_execute = all_seeders
         
-        # Ejecuta los seeders
+        # Ejecuta los seeders aprovechando el sistema de dependencias automáticas
         for name, seeder_class in seeders_to_execute:
             if force_run or seeder_class.should_run():
-                self.stdout.write(f'Ejecutando {name}...')
-                if seeder_class.seed():
-                    self.stdout.write(self.style.SUCCESS(f'{name} completado'))
+                self.stdout.write(self.style.HTTP_INFO(f'Ejecutando {name}...'))
+                if seeder_class.seed():  # Este método ejecuta automáticamente las dependencias primero
+                    self.stdout.write(self.style.SUCCESS(f'✅ {name} completado exitosamente'))
                 else:
-                    self.stdout.write(self.style.ERROR(f'Error al ejecutar {name}'))
+                    self.stdout.write(self.style.ERROR(f'❌ Error al ejecutar {name}'))
             else:
                 self.stdout.write(self.style.WARNING(
-                    f'{name} no necesita ejecutarse (should_run() devolvió False)'
+                    f'➡️ {name} no necesita ejecutarse (should_run() devolvió False)'
                 ))
