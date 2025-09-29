@@ -198,6 +198,7 @@ export type ResidenteOption = {
 
 // Exportar tipos de unidades
 export type { Unidad, UnidadForm, UnidadFilterParams } from './unidades';
+export type { AreaComun, AreaComunForm, EstadoArea } from './areas-comunes';
 
 // Exportar tipos actualizados de notificaciones
 export type {

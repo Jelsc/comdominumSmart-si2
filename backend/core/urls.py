@@ -50,9 +50,11 @@ urlpatterns = [
     
     # Notificaciones: gestión de notificaciones del condominio
     path("api/notificaciones/", include("notificaciones.urls")),
-    
+
     path("api/bitacora/", include("bitacora.urls")),
-    
+
+    path("api/areas-comunes/", include("areas_comunes.urls")),
+
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
 

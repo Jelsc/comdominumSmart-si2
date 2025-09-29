@@ -118,6 +118,7 @@ INSTALLED_APPS = [
     "residentes",
     "personal",
     "notificaciones",
+    "areas_comunes",
     # Requisito para allauth
     "django.contrib.sites",
     # Allauth (core + cuentas + social)
