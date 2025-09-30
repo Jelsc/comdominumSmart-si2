@@ -216,3 +216,44 @@ class NotificacionViewSet(viewsets.ModelViewSet):
                 continue
         
         return Response(roles_con_usuarios)
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def mis_notificaciones(self, request):
+        """
+        Endpoint específico para residentes - obtener sus notificaciones
+        """
+        try:
+            # Obtener el residente asociado al usuario
+            if hasattr(request.user, 'residente_profile'):
+                residente = request.user.residente_profile
+                
+                # Filtrar notificaciones que incluyan al residente
+                queryset = Notificacion.objects.filter(
+                    Q(roles_destinatarios__contains=[residente.tipo]) |
+                    Q(es_individual=True, destinatarios_individuales__contains=[residente.id])
+                ).distinct()
+                
+                # Aplicar filtros adicionales
+                estado = request.query_params.get('estado')
+                if estado == 'no_leida':
+                    queryset = queryset.exclude(estado='leida')
+                elif estado:
+                    queryset = queryset.filter(estado=estado)
+                
+                no_leidas = request.query_params.get('no_leidas')
+                if no_leidas == 'true':
+                    queryset = queryset.exclude(estado='leida')
+                
+                # Serializar y devolver
+                serializer = NotificacionSerializer(queryset, many=True)
+                return Response(serializer.data)
+            else:
+                return Response(
+                    {'error': 'Usuario no tiene perfil de residente'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

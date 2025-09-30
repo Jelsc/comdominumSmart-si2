@@ -61,6 +61,9 @@ urlpatterns = [
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
 
+    # Reservas: gestión de reservas de áreas comunes
+    path("api/reservas/", include("reservas.urls")),
+
     # Auth social: endpoints para login social (navegador)
     path("accounts/", include("allauth.urls")),
     

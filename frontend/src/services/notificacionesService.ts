@@ -33,7 +33,7 @@ class NotificacionesService {
       params.append("page_size", filters.page_size.toString());
 
     const response = await api.get<PaginatedResponse<Notificacion>>(
-      `${this.baseUrl}/notificaciones/?${params}`
+      `${this.baseUrl}/?${params}`
     );
     return response.data;
   }
@@ -43,7 +43,7 @@ class NotificacionesService {
    */
   async getNotificacion(id: number): Promise<Notificacion> {
     const response = await api.get<Notificacion>(
-      `${this.baseUrl}/notificaciones/${id}/`
+      `${this.baseUrl}/${id}/`
     );
     return response.data;
   }
@@ -66,7 +66,7 @@ class NotificacionesService {
       };
 
       const response = await api.post<Notificacion>(
-        `${this.baseUrl}/notificaciones/`,
+        `${this.baseUrl}/`,
         payload
       );
       return {
@@ -102,7 +102,7 @@ class NotificacionesService {
       };
 
       const response = await api.patch<Notificacion>(
-        `${this.baseUrl}/notificaciones/${id}/`,
+        `${this.baseUrl}/${id}/`,
         payload
       );
       return {
@@ -125,7 +125,7 @@ class NotificacionesService {
    */
   async deleteNotificacion(id: number): Promise<ApiResponse> {
     try {
-      await api.delete(`${this.baseUrl}/notificaciones/${id}/`);
+      await api.delete(`${this.baseUrl}/${id}/`);
       return {
         success: true,
         message: "Notificación eliminada exitosamente",
@@ -144,7 +144,7 @@ class NotificacionesService {
    */
   async getEstadisticas(): Promise<NotificacionEstadisticas> {
     const response = await api.get<NotificacionEstadisticas>(
-      `${this.baseUrl}/notificaciones/estadisticas/`
+      `${this.baseUrl}/estadisticas/`
     );
     return response.data;
   }
@@ -154,7 +154,7 @@ class NotificacionesService {
    */
   async getNotificacionesHoy(): Promise<Notificacion[]> {
     const response = await api.get<Notificacion[]>(
-      `${this.baseUrl}/notificaciones/programadas_hoy/`
+      `${this.baseUrl}/programadas_hoy/`
     );
     return response.data;
   }
@@ -164,7 +164,7 @@ class NotificacionesService {
    */
   async enviarNotificacion(id: number): Promise<ApiResponse> {
     try {
-      await api.post(`${this.baseUrl}/notificaciones/${id}/enviar/`);
+      await api.post(`${this.baseUrl}/${id}/enviar/`);
       return {
         success: true,
         message: "Notificación enviada exitosamente",
@@ -182,7 +182,7 @@ class NotificacionesService {
    */
   async cancelarNotificacion(id: number): Promise<ApiResponse> {
     try {
-      await api.post(`${this.baseUrl}/notificaciones/${id}/cancelar/`);
+      await api.post(`${this.baseUrl}/${id}/cancelar/`);
       return {
         success: true,
         message: "Notificación cancelada exitosamente",
@@ -202,7 +202,7 @@ class NotificacionesService {
   async getRolesDisponibles(): Promise<RolOption[]> {
     try {
       const response = await api.get<RolOption[]>(
-        `${this.baseUrl}/notificaciones/roles_disponibles/`
+        `${this.baseUrl}/roles_disponibles/`
       );
       return response.data;
     } catch (error) {
@@ -232,7 +232,7 @@ class NotificacionesService {
     rolesIds.forEach((id) => params.append("roles[]", id.toString()));
 
     const response = await api.get(
-      `${this.baseUrl}/notificaciones/usuarios_por_rol/?${params.toString()}`
+      `${this.baseUrl}/usuarios_por_rol/?${params.toString()}`
     );
     return response.data;
   }

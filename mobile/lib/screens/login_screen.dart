@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController(); // Cambiar de email a username
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose(); // Cambiar de email a username
     _passwordController.dispose();
     super.dispose();
   }
@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final credentials = LoginCredentials(
-        email: _emailController.text.trim(),
+        username: _usernameController.text.trim(), // Cambiar de email a username
         password: _passwordController.text,
       );
 
@@ -109,21 +109,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // Campo de email
+                // Campo de username
                 TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _usernameController,
+                  keyboardType: TextInputType.text,
                   decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                    prefixIcon: Icon(Icons.email),
+                    labelText: 'Nombre de usuario',
+                    prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Por favor ingresa un email válido';
+                      return 'Por favor ingresa tu nombre de usuario';
                     }
                     return null;
                   },
