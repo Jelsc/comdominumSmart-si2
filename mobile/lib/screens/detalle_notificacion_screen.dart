@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/notificacion_service.dart';
+import '../models/notificacion.dart';
 
 class DetalleNotificacionScreen extends StatefulWidget {
   final Notificacion notificacion;
@@ -18,7 +19,7 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
   bool _isLoading = false;
 
   Future<void> _marcarComoLeida() async {
-    if (widget.notificacion.esLeida) return;
+    if (widget.notificacion.estado == 'leida') return;
 
     setState(() {
       _isLoading = true;
@@ -61,7 +62,7 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
         backgroundColor: _getTipoColor(widget.notificacion.tipo),
         foregroundColor: Colors.white,
         actions: [
-          if (!widget.notificacion.esLeida)
+          if (widget.notificacion.estado != 'leida')
             IconButton(
               icon: _isLoading
                   ? const SizedBox(
@@ -122,7 +123,7 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
                             ],
                           ),
                         ),
-                        if (widget.notificacion.esLeida)
+                        if (widget.notificacion.estado == 'leida')
                           const Icon(
                             Icons.check_circle,
                             color: Colors.green,
@@ -202,25 +203,25 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
                     const SizedBox(height: 16),
                     _buildInfoRow(
                       'Fecha de Creación',
-                      '${widget.notificacion.fechaCreacionFormateada} ${widget.notificacion.horaCreacionFormateada}',
+                      '${_formatearFecha(widget.notificacion.fechaCreacion)}',
                       Icons.calendar_today,
                     ),
                     if (widget.notificacion.fechaProgramada != null)
                       _buildInfoRow(
                         'Fecha Programada',
-                        '${widget.notificacion.fechaProgramada!.day}/${widget.notificacion.fechaProgramada!.month}/${widget.notificacion.fechaProgramada!.year} ${widget.notificacion.fechaProgramada!.hour.toString().padLeft(2, '0')}:${widget.notificacion.fechaProgramada!.minute.toString().padLeft(2, '0')}',
+                        '${_formatearFecha(widget.notificacion.fechaProgramada!)}',
                         Icons.schedule,
                       ),
                     if (widget.notificacion.fechaExpiracion != null)
                       _buildInfoRow(
                         'Fecha de Expiración',
-                        '${widget.notificacion.fechaExpiracion!.day}/${widget.notificacion.fechaExpiracion!.month}/${widget.notificacion.fechaExpiracion!.year}',
+                        '${_formatearFecha(widget.notificacion.fechaExpiracion!)}',
                         Icons.event_busy,
                       ),
-                    if (widget.notificacion.creadoPor != null)
+                    if (widget.notificacion.creadoPorInfo != null)
                       _buildInfoRow(
                         'Creado por',
-                        widget.notificacion.creadoPor!,
+                        widget.notificacion.creadoPorInfo!['nombre_completo'] ?? 'Usuario',
                         Icons.person,
                       ),
                     _buildInfoRow(
@@ -258,9 +259,9 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: widget.notificacion.rolesDestinatarios
+                        children: widget.notificacion.rolesDestinatariosInfo
                             .map((rol) => Chip(
-                                  label: Text(rol.nombre),
+                                  label: Text(rol['nombre'] ?? 'Rol'),
                                   backgroundColor: Colors.blue.withOpacity(0.1),
                                   side: BorderSide(color: Colors.blue.withOpacity(0.3)),
                                 ))
@@ -274,7 +275,7 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: !widget.notificacion.esLeida
+      bottomNavigationBar: widget.notificacion.estado != 'leida'
           ? Container(
               padding: const EdgeInsets.all(16),
               child: SizedBox(
@@ -424,6 +425,26 @@ class _DetalleNotificacionScreenState extends State<DetalleNotificacionScreen> {
         return Colors.green;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _formatearFecha(String fecha) {
+    try {
+      final dateTime = DateTime.parse(fecha);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+      
+      if (difference.inDays == 0) {
+        return 'Hoy ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      } else if (difference.inDays == 1) {
+        return 'Ayer ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} días atrás';
+      } else {
+        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      }
+    } catch (e) {
+      return fecha;
     }
   }
 }

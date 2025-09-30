@@ -228,10 +228,18 @@ class NotificacionViewSet(viewsets.ModelViewSet):
                 residente = request.user.residente_profile
                 
                 # Filtrar notificaciones que incluyan al residente
-                queryset = Notificacion.objects.filter(
-                    Q(roles_destinatarios__contains=[residente.tipo]) |
-                    Q(es_individual=True, destinatarios_individuales__contains=[residente.id])
-                ).distinct()
+                # Primero obtenemos el rol correspondiente al tipo de residente
+                from users.models import Rol
+                try:
+                    rol_residente = Rol.objects.get(nombre=residente.tipo)
+                    queryset = Notificacion.objects.filter(
+                        roles_destinatarios=rol_residente
+                    ).distinct()
+                except Rol.DoesNotExist:
+                    # Si no existe el rol, mostrar todas las notificaciones generales
+                    queryset = Notificacion.objects.filter(
+                        es_individual=False
+                    ).distinct()
                 
                 # Aplicar filtros adicionales
                 estado = request.query_params.get('estado')

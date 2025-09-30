@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/notificacion_service.dart';
+import '../models/notificacion.dart';
 import 'detalle_notificacion_screen.dart';
 
 class NotificacionesScreen extends StatefulWidget {
@@ -29,8 +30,6 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
   }
   
   Future<void> _inicializarYcargarNotificaciones() async {
-    // Forzar configuración de URL para asegurar que use la IP correcta
-    await _notificacionService.forceUrlConfiguration();
     _cargarNotificaciones();
   }
 
@@ -48,13 +47,21 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
       });
 
       final notificaciones = await _notificacionService.getNotificaciones();
-      final noLeidas = await _notificacionService.getNotificacionesNoLeidas();
-      final estadisticas = await _notificacionService.getEstadisticas();
+      final noLeidas = await _notificacionService.getNotificaciones(noLeidas: true);
+      
+      // Intentar cargar estadísticas, pero no fallar si no hay permisos
+      NotificacionEstadisticas? estadisticas;
+      try {
+        estadisticas = await _notificacionService.getEstadisticas();
+      } catch (e) {
+        // Si no hay permisos para estadísticas, continuar sin ellas
+        print('No se pudieron cargar estadísticas: $e');
+      }
 
       setState(() {
         _notificaciones = notificaciones;
         _notificacionesNoLeidas = noLeidas;
-        _notificacionesLeidas = notificaciones.where((n) => n.esLeida).toList();
+        _notificacionesLeidas = notificaciones.where((n) => n.estado == 'leida').toList();
         _estadisticas = estadisticas;
         _isLoading = false;
       });
@@ -270,7 +277,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
   Widget _buildNotificacionCard(Notificacion notificacion) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: notificacion.esLeida ? 1 : 3,
+      elevation: notificacion.estado == 'leida' ? 1 : 3,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: _getTipoColor(notificacion.tipo),
@@ -283,8 +290,8 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
         title: Text(
           notificacion.nombre,
           style: TextStyle(
-            fontWeight: notificacion.esLeida ? FontWeight.normal : FontWeight.bold,
-            color: notificacion.esLeida ? Colors.grey[600] : Colors.black87,
+            fontWeight: notificacion.estado == 'leida' ? FontWeight.normal : FontWeight.bold,
+            color: notificacion.estado == 'leida' ? Colors.grey[600] : Colors.black87,
           ),
         ),
         subtitle: Column(
@@ -296,7 +303,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: notificacion.esLeida ? Colors.grey[500] : Colors.grey[700],
+                color: notificacion.estado == 'leida' ? Colors.grey[500] : Colors.grey[700],
               ),
             ),
             const SizedBox(height: 8),
@@ -307,7 +314,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
                 _buildChip(notificacion.prioridadDisplay, _getPrioridadColor(notificacion.prioridad)),
                 const Spacer(),
                 Text(
-                  '${notificacion.fechaCreacionFormateada} ${notificacion.horaCreacionFormateada}',
+                  '${_formatearFecha(notificacion.fechaCreacion)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[500],
@@ -317,7 +324,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
             ),
           ],
         ),
-        trailing: notificacion.esLeida
+        trailing: notificacion.estado == 'leida'
             ? const Icon(Icons.check_circle, color: Colors.green)
             : IconButton(
                 icon: const Icon(Icons.mark_email_read),
@@ -326,7 +333,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
               ),
         onTap: () async {
           // Marcar como leída si no lo está
-          if (!notificacion.esLeida) {
+          if (notificacion.estado != 'leida') {
             await _marcarComoLeida(notificacion);
           }
           
@@ -417,6 +424,26 @@ class _NotificacionesScreenState extends State<NotificacionesScreen>
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _formatearFecha(String fecha) {
+    try {
+      final dateTime = DateTime.parse(fecha);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+      
+      if (difference.inDays == 0) {
+        return 'Hoy ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      } else if (difference.inDays == 1) {
+        return 'Ayer ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} días atrás';
+      } else {
+        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      }
+    } catch (e) {
+      return fecha;
     }
   }
 }

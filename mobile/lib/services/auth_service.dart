@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 
 // Configuración base de la API
-const String apiBaseUrl = "http://localhost:8000"; // Para emulador Android
+const String apiBaseUrl = "http://10.0.2.2:8000"; // Para emulador Android
 
 // Tipos de datos para la API
 class ApiResponse<T> {
