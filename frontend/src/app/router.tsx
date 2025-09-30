@@ -18,6 +18,7 @@ import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 import AreasComunesPage from "@/pages/admin/areas-comunes/areas-comunes.page";
 import InventarioPage from "@/pages/admin/inventario/inventario.page";
+import ReservasPage from "@/pages/admin/reservas/reservas.page";
 
 export default function AppRouter() {
   return (
@@ -134,6 +135,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute requireAdmin={true}>
               <InventarioPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reservas"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <ReservasPage />
             </ProtectedRoute>
           }
         />

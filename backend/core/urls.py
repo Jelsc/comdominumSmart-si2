@@ -69,6 +69,9 @@ urlpatterns = [
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
 
+    # Reservas: gestión de reservas de áreas comunes
+    path("api/reservas/", include("reservas.urls")),
+
     # Seguridad: reconocimiento facial y OCR de placas
     path(
         "api/seguridad/reconocimiento-placa/",
@@ -111,7 +114,7 @@ urlpatterns = [
         delete_face,
         name="delete-face",
     ),
-    
+
     # Auth social: endpoints para login social (navegador)
     path("accounts/", include("allauth.urls")),
 ]

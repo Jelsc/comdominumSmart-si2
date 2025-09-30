@@ -20,7 +20,7 @@ export const notificacionesService = {
     queryParams.append('usuario_actual', 'true');
     
     try {
-      const response = await api.get<PaginatedResponse<Notificacion>>(`/api/notificaciones/notificaciones/?${queryParams}`);
+      const response = await api.get<PaginatedResponse<Notificacion>>(`/api/notificaciones/?${queryParams}`);
       return response.data;
     } catch (error: any) {
       console.error('Error en getUserNotifications:', error.response?.data || error.message);
@@ -36,7 +36,7 @@ export const notificacionesService = {
   async markAsRead(notificationId: number) {
     try {
       // Usamos el endpoint específico para marcar como leída en lugar del PATCH genérico
-      const response = await api.post(`/api/notificaciones/notificaciones/${notificationId}/marcar_como_leida/`);
+      const response = await api.post(`/api/notificaciones/${notificationId}/marcar_como_leida/`);
       return response.data;
     } catch (error: any) {
       console.error('Error al marcar notificación como leída:', error);
@@ -44,7 +44,7 @@ export const notificacionesService = {
       // Si el endpoint específico falla, intentamos con el método anterior como fallback
       try {
         // Primero obtenemos la notificación actual para mantener sus datos
-        const getResponse = await api.get(`/api/notificaciones/notificaciones/${notificationId}/`);
+        const getResponse = await api.get(`/api/notificaciones/${notificationId}/`);
         const notificacion = getResponse.data;
         
         // Actualizamos solo el estado a "leida" (en minúsculas según el backend)
@@ -53,7 +53,7 @@ export const notificacionesService = {
           estado: 'leida'
         };
         
-        const patchResponse = await api.patch(`/api/notificaciones/notificaciones/${notificationId}/`, updateData);
+        const patchResponse = await api.patch(`/api/notificaciones/${notificationId}/`, updateData);
         return patchResponse.data;
       } catch (fallbackError) {
         console.error('Error en método fallback:', fallbackError);

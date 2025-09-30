@@ -141,6 +141,7 @@ INSTALLED_APPS = [
     "bitacora",
     "unidades",
     "inventario",
+    "reservas",
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"

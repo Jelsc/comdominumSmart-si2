@@ -13,7 +13,8 @@ import {
   Bell,
   LandPlot,
   WavesLadder,
-  ClipboardList
+  ClipboardList,
+  Calendar
 } from "lucide-react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -144,6 +145,12 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           name: "Inventario",
           icon: ClipboardList,
           route: "/admin/inventario"
+        },
+        {
+          id: "reservas",
+          name: "Reservas",
+          icon: Calendar,
+          route: "/admin/reservas"
         },
       ],
     },

@@ -171,3 +171,22 @@ class ResidenteViewSet(viewsets.ModelViewSet):
         queryset = Residente.objects.filter(unidad_habitacional=unidad)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def mi_perfil(self, request):
+        """Obtiene el perfil del residente del usuario autenticado"""
+        try:
+            # Buscar el residente asociado al usuario actual
+            residente = Residente.objects.get(usuario=request.user)
+            serializer = self.get_serializer(residente)
+            return Response(serializer.data)
+        except Residente.DoesNotExist:
+            return Response(
+                {"error": "No se encontró un perfil de residente para este usuario"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error al obtener perfil: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 
 // Configuración base de la API
-const String apiBaseUrl = "http://10.0.2.2:8000"; // Para emulador Android
+const String apiBaseUrl = "http://localhost:8000"; // Para emulador Android
 
 // Tipos de datos para la API
 class ApiResponse<T> {
@@ -61,13 +61,13 @@ class Residente {
       id: json['id'] ?? 0,
       username: json['username'] ?? '',
       email: json['email'] ?? '',
-      firstName: json['nombre'] ?? '', // Backend usa 'nombre' no 'first_name'
-      lastName: json['apellido'] ?? '', // Backend usa 'apellido' no 'last_name'
+      firstName: json['nombre'] ?? json['first_name'] ?? '', // Priorizar formato de residente
+      lastName: json['apellido'] ?? json['last_name'] ?? '', // Priorizar formato de residente
       telefono: json['telefono'],
       unidadHabitacional: json['unidad_habitacional'],
       tipo: json['tipo'] ?? 'inquilino',
       estado: json['estado'] ?? 'activo',
-      isActive: json['puede_acceder'] ?? false, // Backend devuelve 'puede_acceder'
+      isActive: json['puede_acceder'] ?? json['is_active'] ?? false, // Priorizar formato de residente
     );
   }
 
@@ -81,30 +81,30 @@ class Residente {
       'id': id,
       'username': username,
       'email': email,
-      'nombre': firstName, // Backend usa 'nombre'
-      'apellido': lastName, // Backend usa 'apellido'
+      'nombre': firstName, // Usar formato de residente
+      'apellido': lastName, // Usar formato de residente
       'telefono': telefono,
       'unidad_habitacional': unidadHabitacional,
       'tipo': tipo,
       'estado': estado,
-      'puede_acceder': isActive, // Backend usa 'puede_acceder'
+      'puede_acceder': isActive, // Usar formato de residente
     };
   }
 }
 
 class LoginCredentials {
-  final String email;
+  final String username; // Cambiar de email a username
   final String password;
   final bool rememberMe;
 
   LoginCredentials({
-    required this.email,
+    required this.username, // Cambiar de email a username
     required this.password,
     this.rememberMe = false,
   });
 
   Map<String, dynamic> toJson() {
-    return {'email': email, 'password': password};
+    return {'username': username, 'password': password}; // Usar username en lugar de email
   }
 }
 
@@ -297,6 +297,7 @@ class AuthService {
   // Login para residentes
   Future<ApiResponse<Residente>> login(LoginCredentials credentials) async {
     try {
+      // Usar el mismo endpoint que el frontend: /api/auth/login/
       final response = await _apiRequestWithoutAuth<Map<String, dynamic>>(
         '/api/auth/login/',
         method: 'POST',
@@ -310,8 +311,8 @@ class AuthService {
           await saveToken(data['access']);
         }
 
-        // Obtener perfil del residente
-        final profileResponse = await getCurrentUser();
+        // Obtener perfil del usuario usando el endpoint de perfil de usuario
+        final profileResponse = await getUserProfile();
         if (profileResponse.success && profileResponse.data != null) {
           return ApiResponse<Residente>(
             success: true,
@@ -321,7 +322,7 @@ class AuthService {
         } else {
           return ApiResponse<Residente>(
             success: false,
-            error: 'Error al obtener perfil del residente',
+            error: 'Error al obtener perfil del usuario',
           );
         }
       } else {
@@ -338,7 +339,37 @@ class AuthService {
     }
   }
 
-  // Obtener información del residente actual
+  // Obtener perfil del residente autenticado
+  Future<ApiResponse<Residente>> getUserProfile() async {
+    try {
+      final response = await _apiRequest<Map<String, dynamic>>(
+        '/api/residentes/mi_perfil/',
+      );
+      
+      if (response.success && response.data != null) {
+        final residenteData = response.data!;
+        // Convertir los datos del residente
+        final residente = Residente.fromJson(residenteData);
+        
+        return ApiResponse<Residente>(
+          success: true,
+          data: residente,
+        );
+      }
+      
+      return ApiResponse<Residente>(
+        success: false,
+        error: response.error ?? 'Error al obtener perfil del residente',
+      );
+    } catch (e) {
+      return ApiResponse<Residente>(
+        success: false,
+        error: 'Error al obtener perfil: $e',
+      );
+    }
+  }
+
+  // Obtener información del residente actual (método alternativo)
   Future<ApiResponse<Residente>> getCurrentUser() async {
     try {
       final response = await _apiRequest<Map<String, dynamic>>(
