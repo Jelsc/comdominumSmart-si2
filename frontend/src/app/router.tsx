@@ -17,6 +17,7 @@ import NotificacionesPage from "../pages/admin/notificaciones/notificaciones.pag
 import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 import AreasComunesPage from "@/pages/admin/areas-comunes/areas-comunes.page";
+import InventarioPage from "@/pages/admin/inventario/inventario.page";
 
 export default function AppRouter() {
   return (
@@ -125,6 +126,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute requireAdmin={true}>
               <AreasComunesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/inventario"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <InventarioPage />
             </ProtectedRoute>
           }
         />

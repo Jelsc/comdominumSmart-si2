@@ -19,3 +19,6 @@ export { tokenUtils } from "./api";
 
 // Exportar servicios de notificaciones
 export { notificacionesService } from "./notificacionesService";
+
+// Exportar servicio de inventario
+export { inventarioApi } from "./inventario.api";

@@ -21,6 +21,7 @@ class BaseSeeder:
         'UnidadSeeder',
         'ResidenteSeeder',
         'AreaComunSeeder',
+        'InventarioSeeder',
     ]
     
     # Mapa de dependencias entre seeders
@@ -28,6 +29,7 @@ class BaseSeeder:
         'UserSeeder': ['RolSeeder'],
         'PersonalSeeder': ['UserSeeder'],
         'ResidenteSeeder': ['UnidadSeeder'],
+        'InventarioSeeder': ['AreaComunSeeder'],
     }
     
     @classmethod

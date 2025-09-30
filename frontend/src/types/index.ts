@@ -199,6 +199,15 @@ export type ResidenteOption = {
 // Exportar tipos de unidades
 export type { Unidad, UnidadForm, UnidadFilterParams } from './unidades';
 export type { AreaComun, AreaComunForm, EstadoArea } from './areas-comunes';
+export type { 
+  Inventario, 
+  InventarioDetallado, 
+  InventarioForm, 
+  InventarioFilter,
+  EstadoInventario,
+  CategoriaInventario,
+  EstadisticasInventario
+} from './inventario';
 
 // Exportar tipos actualizados de notificaciones
 export type {

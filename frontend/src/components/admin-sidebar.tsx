@@ -12,7 +12,8 @@ import {
   Home,
   Bell,
   LandPlot,
-  WavesLadder
+  WavesLadder,
+  ClipboardList
 } from "lucide-react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -137,6 +138,12 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           name: "Áreas Comunes",
           icon: WavesLadder,
           route: "/admin/areas-comunes"
+        },
+        {
+          id: "inventario",
+          name: "Inventario",
+          icon: ClipboardList,
+          route: "/admin/inventario"
         },
       ],
     },

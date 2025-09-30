@@ -54,6 +54,9 @@ urlpatterns = [
     path("api/bitacora/", include("bitacora.urls")),
 
     path("api/areas-comunes/", include("areas_comunes.urls")),
+    
+    # Inventario: gestión de inventario
+    path("api/inventario/", include("inventario.urls")),
 
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
