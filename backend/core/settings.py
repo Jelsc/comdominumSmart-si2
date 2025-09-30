@@ -27,6 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-dev")
 
+# AWS Rekognition
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 
@@ -119,6 +124,7 @@ INSTALLED_APPS = [
     "personal",
     "notificaciones",
     "areas_comunes",
+    "seguridad",
     # Requisito para allauth
     "django.contrib.sites",
     # Allauth (core + cuentas + social)

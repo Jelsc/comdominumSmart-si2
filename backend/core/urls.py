@@ -18,6 +18,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.auth_views import logout_view
+import test_seguridad_simple
+from seguridad.facial_recognition_views import (
+    detect_faces,
+    register_face,
+    recognize_face,
+    list_registered_faces,
+    delete_face,
+)
 
 
 # Endpoints principales del sistema
@@ -61,8 +69,49 @@ urlpatterns = [
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
 
+    # Seguridad: reconocimiento facial y OCR de placas
+    path(
+        "api/seguridad/reconocimiento-placa/",
+        test_seguridad_simple.test_plate_recognition,
+        name="test-plate-recognition",
+    ),
+    path(
+        "api/seguridad/personas/",
+        test_seguridad_simple.handle_personas,
+        name="handle-personas",
+    ),
+    path(
+        "api/seguridad/vehiculos/",
+        test_seguridad_simple.handle_vehiculos,
+        name="handle-vehiculos",
+    ),
+    # Reconocimiento facial con AWS Rekognition
+    path(
+        "api/seguridad/detectar-caras/",
+        detect_faces,
+        name="detect-faces",
+    ),
+    path(
+        "api/seguridad/registrar-cara/",
+        register_face,
+        name="register-face",
+    ),
+    path(
+        "api/seguridad/reconocer-cara/",
+        recognize_face,
+        name="recognize-face",
+    ),
+    path(
+        "api/seguridad/caras-registradas/",
+        list_registered_faces,
+        name="list-faces",
+    ),
+    path(
+        "api/seguridad/eliminar-cara/",
+        delete_face,
+        name="delete-face",
+    ),
+    
     # Auth social: endpoints para login social (navegador)
     path("accounts/", include("allauth.urls")),
-    
-    
 ]
