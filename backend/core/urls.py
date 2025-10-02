@@ -32,47 +32,33 @@ from seguridad.facial_recognition_views import (
 urlpatterns = [
     # Panel de administración de Django
     path("admin/", admin.site.urls),
-    
     # ENDPOINTS DE API (todos bajo /api/)
-    
     # Auth: login/logout/password/reset para clientes
     # Ruta personalizada para logout
-    path("api/auth/logout/", logout_view, name='rest_logout'),
+    path("api/auth/logout/", logout_view, name="rest_logout"),
     # Resto de rutas de autenticación
     path("api/auth/", include("dj_rest_auth.urls")),
-    
     # Auth: registro de clientes
     path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
-    
     # Admin: gestión de usuarios, roles y permisos
     path("api/admin/", include("users.urls")),
-    
     # Residentes: gestión de residentes del condominio
     path("api/residentes/", include("residentes.urls")),
-    
     # Personal: gestión de personal de empresa
     path("api/personal/", include("personal.urls")),
-    
     # ML: servicios de inteligencia artificial
     path("api/ml/", include("services.urls")),
-    
     # Notificaciones: gestión de notificaciones del condominio
     path("api/notificaciones/", include("notificaciones.urls")),
-
     path("api/bitacora/", include("bitacora.urls")),
-
     path("api/areas-comunes/", include("areas_comunes.urls")),
-    
     # Inventario: gestión de inventario
     path("api/inventario/", include("inventario.urls")),
-
     # Unidades: gestión de unidades habitacionales
     path("api/unidades/", include("unidades.urls")),
-
-    # Reservas: gestión de reservas de áreas comunes
-    path("api/reservas/", include("reservas.urls")),
-
     # Seguridad: reconocimiento facial y OCR de placas
+    # path("api/seguridad/", include("seguridad.urls")),  # Temporalmente deshabilitado
+    # Endpoints temporales de prueba
     path(
         "api/seguridad/reconocimiento-placa/",
         test_seguridad_simple.test_plate_recognition,
@@ -114,7 +100,6 @@ urlpatterns = [
         delete_face,
         name="delete-face",
     ),
-
     # Auth social: endpoints para login social (navegador)
     path("accounts/", include("allauth.urls")),
 ]

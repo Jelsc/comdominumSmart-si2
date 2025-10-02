@@ -14,7 +14,8 @@ import {
   LandPlot,
   WavesLadder,
   ClipboardList,
-  Calendar
+  Camera,
+  Shield,
 } from "lucide-react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -122,10 +123,10 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           route: "/admin/residentes",
         },
         {
-          id: 'unidades',
-          name: 'Unidades Habitacionales',
+          id: "unidades",
+          name: "Unidades Habitacionales",
           icon: Home,
-          route: '/admin/unidades'
+          route: "/admin/unidades",
         },
       ],
     },
@@ -138,19 +139,13 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           id: "areas-comunes",
           name: "Áreas Comunes",
           icon: WavesLadder,
-          route: "/admin/areas-comunes"
+          route: "/admin/areas-comunes",
         },
         {
           id: "inventario",
           name: "Inventario",
           icon: ClipboardList,
-          route: "/admin/inventario"
-        },
-        {
-          id: "reservas",
-          name: "Reservas",
-          icon: Calendar,
-          route: "/admin/reservas"
+          route: "/admin/inventario",
         },
       ],
     },
@@ -165,6 +160,25 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       name: "Bitácora",
       icon: BookOpen,
       route: "/admin/bitacora",
+    },
+    {
+      id: "seguridad",
+      name: "Seguridad",
+      icon: Shield,
+      submodules: [
+        {
+          id: "seguridad-general",
+          name: "Seguridad General",
+          icon: ShieldCheck,
+          route: "/admin/seguridad",
+        },
+        {
+          id: "reconocimiento-facial",
+          name: "Reconocimiento Facial",
+          icon: Camera,
+          route: "/admin/reconocimiento-facial",
+        },
+      ],
     },
   ];
 

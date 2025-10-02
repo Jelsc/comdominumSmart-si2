@@ -29,11 +29,13 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-dev")
 
 # AWS Rekognition
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
+
 
 # ========== CONFIGURACIÓN AUTOMÁTICA DE HOSTS ==========
 def get_allowed_hosts():
@@ -44,19 +46,23 @@ def get_allowed_hosts():
     - Producción: cualquier host (*) - Django se encarga de la validación
     """
     env_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "")
-    
+
     if env_hosts and env_hosts.strip():
         # Si hay hosts específicos en la variable de entorno
         hosts = [host.strip() for host in env_hosts.split(",") if host.strip()]
         print(f"🔧 [Django] Hosts configurados por variable de entorno: {hosts}")
         return hosts
-    
+
     # Configuración automática por defecto para máxima compatibilidad
-    default_hosts = ["*"]  # Permitir cualquier host - más flexible para contenedores y nube
+    default_hosts = [
+        "*"
+    ]  # Permitir cualquier host - más flexible para contenedores y nube
     print(f"🌐 [Django] Hosts automáticos configurados: {default_hosts}")
     return default_hosts
 
+
 ALLOWED_HOSTS = get_allowed_hosts()
+
 
 # ========== CONFIGURACIÓN AUTOMÁTICA DE CORS ==========
 def configure_cors():
@@ -67,7 +73,7 @@ def configure_cors():
     """
     # Por defecto permitir todos los orígenes para máxima compatibilidad
     allow_all = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True") == "True"
-    
+
     if allow_all:
         print("🌍 [Django] CORS configurado para permitir TODOS los orígenes")
         return True, []
@@ -75,25 +81,28 @@ def configure_cors():
         # URLs específicas si se desactiva allow_all
         frontend_urls = [
             "http://localhost:5173",
-            "http://127.0.0.1:5173", 
+            "http://127.0.0.1:5173",
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             # Emulador Android
             "http://10.0.2.2:5173",
-            "http://10.0.2.2:8000"
+            "http://10.0.2.2:8000",
         ]
-        
+
         # Agregar URLs de variables de entorno si existen
         env_frontend = os.getenv("FRONTEND_URL")
         env_frontend_alt = os.getenv("FRONTEND_URL_ALT")
-        
+
         if env_frontend:
             frontend_urls.append(env_frontend)
         if env_frontend_alt:
             frontend_urls.append(env_frontend_alt)
-        
-        print(f"🎯 [Django] CORS configurado para orígenes específicos: {frontend_urls}")
+
+        print(
+            f"🎯 [Django] CORS configurado para orígenes específicos: {frontend_urls}"
+        )
         return False, frontend_urls
+
 
 CORS_ALLOW_ALL_ORIGINS, CORS_ALLOWED_ORIGINS = configure_cors()
 CORS_ALLOW_CREDENTIALS = True  # Habilitar cookies/sesión
@@ -124,7 +133,6 @@ INSTALLED_APPS = [
     "personal",
     "notificaciones",
     "areas_comunes",
-    "seguridad",
     # Requisito para allauth
     "django.contrib.sites",
     # Allauth (core + cuentas + social)
@@ -141,7 +149,7 @@ INSTALLED_APPS = [
     "bitacora",
     "unidades",
     "inventario",
-    "reservas",
+    "seguridad",  # Re-habilitado para reconocimiento real
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"
@@ -359,3 +367,23 @@ GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET", "")
 
 # Configuración de sitios para allauth
 SITE_ID = 1
+
+# ====== CONFIGURACIÓN DE SEGURIDAD E IA ======
+# AWS Rekognition
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
+AWS_REKOGNITION_COLLECTION_ID = os.getenv(
+    "AWS_REKOGNITION_COLLECTION_ID", "condominio-rostros"
+)
+
+# Google Vision API
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+
+# Configuración de archivos multimedia
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Configuración de archivos estáticos
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")

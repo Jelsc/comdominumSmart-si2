@@ -81,3 +81,15 @@ temp/
 *.swo
 *~
 
+
+# Credenciales y archivos sensibles
+.env
+backend/credentials/google-credentials.json
+CREDENCIALES_PARA_PRODUCCION.md
+
+# Archivos temporales de configuración
+configurar_*.py
+fix_*.py
+setup_*.py
+activar_*.py
+test_*.py

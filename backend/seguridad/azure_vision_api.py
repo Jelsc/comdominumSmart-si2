@@ -3,6 +3,7 @@ API de Azure Computer Vision para reconocimiento de placas
 100% GRATIS - 5000 requests por mes
 """
 
+import os
 import requests
 import base64
 import json
@@ -17,7 +18,7 @@ class AzureVisionService:
 
     def __init__(self):
         # Clave gratuita de Azure (5000 requests/mes)
-        self.subscription_key = os.getenv("AZURE_VISION_KEY", "")
+        self.subscription_key = os.getenv("AZURE_VISION_SUBSCRIPTION_KEY", "")
         self.endpoint = os.getenv("AZURE_VISION_ENDPOINT", "")
         self.vision_url = self.endpoint + "vision/v3.2/read/analyze"
         self.available = True
