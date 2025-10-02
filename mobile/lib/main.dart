@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'widgets/config_info_widget.dart';
+import 'config/app_config.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +15,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Condominio Smart',
+      title: AppConfig.appName,
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: const AuthWrapper(),
+      home: const FloatingConfigInfo(
+        child: AuthWrapper(),
+      ),
+      debugShowCheckedModeBanner: !AppConfig.isDebugMode,
     );
   }
 }

@@ -123,7 +123,7 @@ class UserSerializer(serializers.ModelSerializer):
             try:
                 from residentes.models import Residente
                 residente = Residente.objects.get(id=residente_id)
-                user.residente = residente
+                
                 # Autocompletar datos directos del residente
                 if not user.first_name:
                     user.first_name = residente.nombre
@@ -135,7 +135,15 @@ class UserSerializer(serializers.ModelSerializer):
                     user.email = residente.email
                 if not user.ci:
                     user.ci = residente.ci
-                    # El modelo Residente no tiene fecha_nacimiento, se omite este campo
+                # El modelo Residente no tiene fecha_nacimiento, se omite este campo
+                
+                # IMPORTANTE: Guardar el usuario primero antes de asociarlo
+                user.save()
+                
+                # Asociar el residente al usuario (relación correcta)
+                residente.usuario = user
+                residente.save()
+                
             except Residente.DoesNotExist:
                 pass
         
@@ -187,12 +195,25 @@ class UserSerializer(serializers.ModelSerializer):
                 try:
                     from residentes.models import Residente
                     residente = Residente.objects.get(id=residente_id)
-                    instance.residente = residente
+                    
+                    # Desasociar el residente anterior si existe
+                    if hasattr(instance, 'residente_profile') and instance.residente_profile:
+                        old_residente = instance.residente_profile
+                        old_residente.usuario = None
+                        old_residente.save()
+                    
+                    # Asociar el nuevo residente al usuario (relación correcta)
+                    residente.usuario = instance
+                    residente.save()
+                    
                 except Residente.DoesNotExist:
                     pass
             else:
                 # Si se envía explícitamente residente_id=null, desasociar el residente
-                instance.residente = None
+                if hasattr(instance, 'residente_profile') and instance.residente_profile:
+                    old_residente = instance.residente_profile
+                    old_residente.usuario = None
+                    old_residente.save()
         
         instance.save()
         return instance

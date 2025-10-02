@@ -20,7 +20,7 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     ViewSet para gestionar notificaciones del condominio
     """
     queryset = Notificacion.objects.all()
-    permission_classes = [permissions.IsAuthenticated, IsAdminPortalUser]
+    permission_classes = [permissions.IsAuthenticated]  # Permitir acceso a usuarios autenticados
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['tipo', 'prioridad', 'es_individual', 'activa', 'estado']
     search_fields = ['nombre', 'descripcion']
@@ -30,6 +30,16 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filtrar notificaciones según el usuario y parámetros de consulta"""
         queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Si NO es administrador, filtrar solo notificaciones dirigidas al usuario
+        if not (user.es_administrativo and user.is_staff):
+            # Solo mostrar notificaciones activas y enviadas
+            queryset = queryset.filter(activa=True, estado='enviada')
+            
+            # Filtrar por roles del usuario actual
+            if user.rol:
+                queryset = queryset.filter(roles_destinatarios=user.rol)
         
         # Verificar si se solicita sólo las notificaciones del usuario actual
         if self.request.query_params.get('usuario_actual') == 'true':
@@ -50,7 +60,7 @@ class NotificacionViewSet(viewsets.ModelViewSet):
             
             return queryset
         
-        return queryset
+        return queryset.distinct()
     
     def get_serializer_class(self):
         """Usar diferentes serializers según la acción"""
@@ -60,7 +70,25 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Asignar el usuario actual como creador"""
+        # Solo administradores pueden crear notificaciones
+        if not (self.request.user.es_administrativo and self.request.user.is_staff):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Solo los administradores pueden crear notificaciones")
         serializer.save(creado_por=self.request.user)
+    
+    def update(self, request, *args, **kwargs):
+        """Solo administradores pueden actualizar notificaciones"""
+        if not (request.user.es_administrativo and request.user.is_staff):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Solo los administradores pueden editar notificaciones")
+        return super().update(request, *args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        """Solo administradores pueden eliminar notificaciones"""
+        if not (request.user.es_administrativo and request.user.is_staff):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Solo los administradores pueden eliminar notificaciones")
+        return super().destroy(request, *args, **kwargs)
     
     @action(detail=False, methods=['get'])
     def estadisticas(self, request):

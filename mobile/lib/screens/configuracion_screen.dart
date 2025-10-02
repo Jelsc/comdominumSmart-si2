@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_config.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
   const ConfiguracionScreen({super.key});
@@ -21,7 +22,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
 
   Future<void> _cargarConfiguracion() async {
     final prefs = await SharedPreferences.getInstance();
-    final url = prefs.getString('api_base_url') ?? 'http://10.0.2.2:8000';
+    final url = prefs.getString('api_base_url') ?? AppConfig.apiBaseUrl;
     setState(() {
       _urlController.text = url;
     });
@@ -94,11 +95,11 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _urlController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'URL del Servidor',
-                          hintText: 'http://10.0.2.2:8000',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.link),
+                          hintText: AppConfig.apiBaseUrl,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.link),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -117,7 +118,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      const Text('• Emulador Android: http://10.0.2.2:8000'),
+                      Text('• Emulador Android: ${EnvironmentConfig.getConfig(Environment.local)['baseUrl']}'),
                       const Text('• Dispositivo físico: http://[TU_IP]:8000'),
                       const Text('• iOS Simulator: http://localhost:8000'),
                     ],

@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 import '../models/notificacion.dart';
+import '../config/app_config.dart';
 
 class NotificacionService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  String get baseUrl => '${AppConfig.apiBaseUrl}/api';
   final AuthService _authService = AuthService();
 
   // Headers para las peticiones autenticadas

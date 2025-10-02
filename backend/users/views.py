@@ -390,6 +390,37 @@ class UserViewSet(viewsets.ModelViewSet):
         except ImportError:
             return Response([])
 
+    @action(detail=False, methods=["get"])
+    def residentes_disponibles(self, request):
+        """Lista residentes disponibles para vincular con usuarios"""
+        if not request.user.tiene_permiso("gestionar_usuarios"):
+            return Response(
+                {"error": "No tienes permisos para ver residentes disponibles"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            from residentes.models import Residente
+
+            # Residentes que no tienen usuario vinculado
+            residentes_disponibles = Residente.objects.filter(
+                usuario__isnull=True,
+                estado='activo'  # Solo residentes activos
+            ).values(
+                'id',
+                'nombre',
+                'apellido',
+                'email',
+                'ci',
+                'telefono',
+                'unidad_habitacional',
+                'tipo'
+            )
+
+            return Response(list(residentes_disponibles))
+        except ImportError:
+            return Response([])
+
 
 # user_dashboard_data movido a auth_views.py para evitar duplicación
 

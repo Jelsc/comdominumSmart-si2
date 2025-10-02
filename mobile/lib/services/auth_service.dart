@@ -3,9 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
-
-// Configuración base de la API
-const String apiBaseUrl = "http://10.0.2.2:8000"; // Para emulador Android
+import '../config/app_config.dart';
 
 // Tipos de datos para la API
 class ApiResponse<T> {
@@ -116,9 +114,12 @@ class AuthService {
 
   // Headers por defecto
   Map<String, String> get _defaultHeaders => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+  
+  // URL base de la API
+  String get _apiBaseUrl => AppConfig.apiBaseUrl;
 
   // Headers con autenticación
   Future<Map<String, String>> get _authHeaders async {
@@ -137,7 +138,7 @@ class AuthService {
     Map<String, dynamic>? body,
     T Function(dynamic)? fromJson,
   }) async {
-    final url = Uri.parse('$apiBaseUrl$endpoint');
+    final url = Uri.parse('$_apiBaseUrl$endpoint');
     final headers = await _authHeaders;
 
     try {
@@ -218,7 +219,7 @@ class AuthService {
     Map<String, dynamic>? body,
     T Function(dynamic)? fromJson,
   }) async {
-    final url = Uri.parse('$apiBaseUrl$endpoint');
+    final url = Uri.parse('$_apiBaseUrl$endpoint');
     final headers = _defaultHeaders;
 
     try {

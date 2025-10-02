@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/reserva.dart';
+import '../config/app_config.dart';
 import 'auth_service.dart';
 
 class ReservaService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  String get baseUrl => '${AppConfig.apiBaseUrl}/api';
   final AuthService _authService = AuthService();
 
   // Headers para las peticiones autenticadas
