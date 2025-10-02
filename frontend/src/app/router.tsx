@@ -18,7 +18,8 @@ import UnidadesPage from "../pages/admin/unidades/unidades.page";
 import AccountSettingsPage from "./auth/account-settings.page";
 import AreasComunesPage from "@/pages/admin/areas-comunes/areas-comunes.page";
 import InventarioPage from "@/pages/admin/inventario/inventario.page";
-import ReservasPage from "@/pages/admin/reservas/reservas.page";
+import SeguridadSimplePage from "@/pages/admin/seguridad/seguridad-simple.page";
+import ReconocimientoFacialPage from "@/pages/admin/reconocimiento-facial.page";
 
 export default function AppRouter() {
   return (
@@ -139,10 +140,18 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/admin/reservas"
+          path="/admin/seguridad"
           element={
             <ProtectedRoute requireAdmin={true}>
-              <ReservasPage />
+              <SeguridadSimplePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reconocimiento-facial"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <ReconocimientoFacialPage />
             </ProtectedRoute>
           }
         />

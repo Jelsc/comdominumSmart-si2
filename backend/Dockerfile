@@ -12,7 +12,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Dependencias para psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev bash tzdata \
- && rm -rf /var/lib/apt/lists/*
+    libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1 \
+    libglib2.0-0 libgtk-3-0 libavcodec-dev libavformat-dev libswscale-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Requisitos primero (mejor cache)
 COPY requirements.txt /app/

@@ -6,6 +6,7 @@ API de Azure Computer Vision para reconocimiento de placas
 import requests
 import base64
 import json
+import os
 from typing import Dict, Any, Optional
 import logging
 
