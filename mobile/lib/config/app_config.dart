@@ -5,7 +5,7 @@ class AppConfig {
   static const String _cloudUrl = "http://3.230.69.204:8000";
   
   // Cambiar esta variable para alternar entre local y nube
-  static const bool _useCloudBackend = true;
+  static const bool _useCloudBackend = false; // Temporalmente local hasta que se actualice la nube
   
   /// URL base de la API
   static String get apiBaseUrl => _useCloudBackend ? _cloudUrl : _localUrl;
