@@ -52,6 +52,8 @@ urlpatterns = [
     path("api/notificaciones/", include("notificaciones.urls")),
     path("api/bitacora/", include("bitacora.urls")),
     path("api/areas-comunes/", include("areas_comunes.urls")),
+    # Reservas: gestión de reservas de áreas comunes
+    path("api/reservas/", include("reservas.urls")),
     # Inventario: gestión de inventario
     path("api/inventario/", include("inventario.urls")),
     # Unidades: gestión de unidades habitacionales
