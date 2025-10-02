@@ -135,8 +135,7 @@ class UserSerializer(serializers.ModelSerializer):
                     user.email = residente.email
                 if not user.ci:
                     user.ci = residente.ci
-                if not user.fecha_nacimiento:
-                    user.fecha_nacimiento = residente.fecha_nacimiento
+                    # El modelo Residente no tiene fecha_nacimiento, se omite este campo
             except Residente.DoesNotExist:
                 pass
         

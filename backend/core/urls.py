@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.auth_views import logout_view
-import test_seguridad_simple
+# import test_seguridad_simple  # Módulo eliminado - comentado temporalmente
 from seguridad.facial_recognition_views import (
     detect_faces,
     register_face,
@@ -58,22 +58,22 @@ urlpatterns = [
     path("api/unidades/", include("unidades.urls")),
     # Seguridad: reconocimiento facial y OCR de placas
     # path("api/seguridad/", include("seguridad.urls")),  # Temporalmente deshabilitado
-    # Endpoints temporales de prueba
-    path(
-        "api/seguridad/reconocimiento-placa/",
-        test_seguridad_simple.test_plate_recognition,
-        name="test-plate-recognition",
-    ),
-    path(
-        "api/seguridad/personas/",
-        test_seguridad_simple.handle_personas,
-        name="handle-personas",
-    ),
-    path(
-        "api/seguridad/vehiculos/",
-        test_seguridad_simple.handle_vehiculos,
-        name="handle-vehiculos",
-    ),
+    # Endpoints temporales de prueba - COMENTADOS (módulo test_seguridad_simple eliminado)
+    # path(
+    #     "api/seguridad/reconocimiento-placa/",
+    #     test_seguridad_simple.test_plate_recognition,
+    #     name="test-plate-recognition",
+    # ),
+    # path(
+    #     "api/seguridad/personas/",
+    #     test_seguridad_simple.handle_personas,
+    #     name="handle-personas",
+    # ),
+    # path(
+    #     "api/seguridad/vehiculos/",
+    #     test_seguridad_simple.handle_vehiculos,
+    #     name="handle-vehiculos",
+    # ),
     # Reconocimiento facial con AWS Rekognition
     path(
         "api/seguridad/detectar-caras/",
